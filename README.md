@@ -20,7 +20,9 @@ data/           Downloaded datasets and caches (gitignored)
 
 ## Webapp
 
-Open `webapp/index.html` in a browser to use the interactive demo.
+Live demo: https://koerding.github.io/crud/
+
+Local demo: open `webapp/index.html` in a browser.
 
 ## Quickstart
 

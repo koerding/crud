@@ -30,7 +30,7 @@ python scripts/run_analysis.py
 python scripts/generate_paper_figures.py
 
 # Compile the paper
-cd paper && pdflatex main && bibtex main && pdflatex main && pdflatex main
+cd paper && pdflatex crud && bibtex crud && pdflatex crud && pdflatex crud
 ```
 
 ## Crud-aware z-test

@@ -12,10 +12,15 @@ scripts/        Entry points for reproducing results
   generate_paper_figures.py Reproduce the 4 main-text figures
   assumption_audit.py       Appendix B diagnostics
   crud_test.py              CLI wrapper for crud-aware z-test
+webapp/         Static interactive webapp (open webapp/index.html)
 data/           Downloaded datasets and caches (gitignored)
   raw/          Original downloads
   cache/        Processed matrices and intermediate files
 ```
+
+## Webapp
+
+Open `webapp/index.html` in a browser to use the interactive demo.
 
 ## Quickstart
 

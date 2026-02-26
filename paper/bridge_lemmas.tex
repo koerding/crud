@@ -1,0 +1,331 @@
+\section{Bridge lemmas: crud scale and limits of association-only causal inference}
+\label{app:bridge-lemmas}
+
+The main text documents an empirical pattern---broad background correlations that persist after low-rank adjustment---and proposes calibrating associations against this background.  Here we formalize why the pattern arises and what it implies.  We prove two results.  First, the typical residual correlation across random feature pairs after removing $K$ principal components is controlled by a simple ratio of eigenvalue tail sums (Theorem~\ref{thm:crud-scale}).  When eigenvalues decay as a power law, this ratio shrinks only as $\sim 1/\sqrt{K}$, explaining the slow empirical decay in Table~\ref{tab:crud-scale}.  Second, we show that any decision rule based solely on a one-dimensional adjusted association statistic incurs irreducible classification error when the causal signal is comparable to the crud scale (Theorem~\ref{thm:assoc-only}).  Both proofs rely on standard random-matrix tools---Haar-like eigenvector moment bounds and Gaussian signal detection---and yield closed-form expressions that can be checked against the empirical values.
+
+\subsection{Setup and notation}
+
+Let $X\in\R^p$ be a mean-zero random vector with population covariance
+$\Sigma=\E[XX^\top]\in\R^{p\times p}$.
+Let $\Sigma=V\Lambda V^\top$ be an eigendecomposition with
+$\Lambda=\diag(\lambda_1,\ldots,\lambda_p)$ and $\lambda_1\ge\cdots\ge\lambda_p\ge 0$.
+For an integer $K\in\{0,1,\ldots,p-1\}$, let $P_K:=\sum_{k=1}^K v_k v_k^\top$ be the projector
+onto the top-$K$ eigenspace (with $P_0=0$). Define the population residual covariance after removing
+the top $K$ principal components as
+\begin{equation}
+\Sigma^{(K)} := (I-P_K)\Sigma(I-P_K) = \sum_{k>K}\lambda_k v_k v_k^\top.
+\end{equation}
+Define the population residual correlation for $i\neq j$ by
+\begin{equation}
+\rho^{(K)}_{ij} := \frac{\Sigma^{(K)}_{ij}}{\sqrt{\Sigma^{(K)}_{ii}\Sigma^{(K)}_{jj}}}.
+\end{equation}
+
+
+\subsection{Crud-aware p-values via random-pair calibration}
+\label{app:crud-aware-pvalues}
+
+A natural question is whether an observed adjusted association is unusual for the domain or merely typical background dependence.
+This subsection defines a ``crud-aware'' p-value that calibrates an observed adjusted association against the empirical background of the domain. The key idea is to treat the realized dataset as fixed and define a reference distribution by drawing feature pairs uniformly at random, while running the same preprocessing and adjustment pipeline as for the target pair.
+The resulting calibration provides an assumption-light baseline for whether an observed association is distinctive.
+
+\paragraph{Adjusted association statistic.}
+Let $\mathbf{X}\in\R^{n\times p}$ denote the observed data matrix (columns are features). Fix an adjustment procedure $A_K$ (for example: regress each feature on the top $K$ principal component scores and standardize the residuals). For any feature pair $(a,b)$ with $1\le a<b\le p$, define a one-dimensional adjusted association statistic
+\begin{equation}
+T_{ab}=T(\mathbf{X};a,b,K).
+\end{equation}
+A canonical example is the sample correlation of adjusted (residualized) features, $T_{ab}=\widehat{\rho}^{(K)}_{ab}$. The only requirement is that the same pipeline (preprocessing, adjustment, and statistic) is used for the target pair and for reference pairs.
+
+\paragraph{Crud-null reference distribution.}
+Rather than testing whether $T_{ij}$ is zero, we compare its magnitude to what is typical for a uniformly random feature pair under the same pipeline. Let
+\begin{equation}
+(A,B)\sim \mathrm{Unif}\Bigl(\{(a,b): 1\le a<b\le p\}\Bigr),
+\end{equation}
+independent of all other randomness. For a threshold $t\ge 0$, define the (two-sided) crud-null tail probability
+\begin{equation}
+p_{\mathrm{crud}}(t)\;:=\;\PP\bigl(|T_{AB}|\ge t \,\big|\, \mathbf{X}\bigr).
+\end{equation}
+This is a conditional probability given the realized dataset $\mathbf{X}$, where the only randomness is the selection of a uniformly random feature pair.
+
+\paragraph{Crud-aware p-value for a target pair.}
+For a specific target pair $(i,j)$, set $t_{\mathrm{obs}}=|T_{ij}|$ and define
+\begin{equation}
+p_{\mathrm{crud}}(i,j)\;:=\;\PP\bigl(|T_{AB}|\ge |T_{ij}| \,\big|\, \mathbf{X}\bigr).
+\end{equation}
+Equivalently, $p_{\mathrm{crud}}(i,j)$ is the fraction of feature pairs whose absolute adjusted association equals or exceeds that of the target pair---a two-sided, magnitude-based rank.
+The \emph{crud percentile} is the complement $1-p_{\mathrm{crud}}(i,j)$: values near 1 indicate that the target pair's association is unusually large relative to the domain background.
+
+\paragraph{Monte Carlo estimation.}
+In practice, $p_{\mathrm{crud}}(i,j)$ is approximated by sampling $M$ reference pairs uniformly from all $\binom{p}{2}$ pairs, computing $T_{A_mB_m}$ for each, and taking the fraction (plus one, for the standard add-one correction) whose absolute value exceeds $|T_{ij}|$. For a uniformly random target pair, $p_{\mathrm{crud}}$ is (super-)uniform by a standard exchangeability argument. For non-randomly chosen targets, it should be interpreted as a domain-calibrated extremeness score rather than a Type-I-error guarantee.
+
+\paragraph{Practical refinements.}
+When features are heterogeneous in type or scale, reference pairs should be stratified (e.g., within the same modality, ROI, or gene family) so the baseline matches the target claim. When crud-aware p-values are computed for many pre-specified pairs, standard multiplicity corrections (e.g., Benjamini--Hochberg) can be applied. The definition of $p_{\mathrm{crud}}$ depends only on the choice of adjustment pipeline and statistic; alternative adjustment strategies are compared in Appendix~\ref{app:alt-adjust}.
+
+\paragraph{A parametric crud-aware test for small studies.}
+The empirical calibration above requires a data matrix large enough to estimate the background distribution of pairwise associations.
+Many studies, however, measure only a handful of variables on a small sample---a psychologist recruiting $n=20$ participants and computing a single correlation, for instance.
+Such a study can be understood as observing a small submatrix of the much larger data matrix one \emph{could} have collected had the budget permitted measuring all variables in the domain.
+The crud factor operates at the level of the full domain: if the typical background correlation among personality measures is $\sigma_{\mathrm{crud}}\approx 0.15$, that background does not disappear simply because the investigator chose to measure only two of them.
+This motivates a parametric analogue of the crud-aware p-value that requires only summary statistics.
+
+\paragraph{Setup.}
+Suppose an investigator observes the sample correlation $\hat\rho$ between two variables measured on $n$ independent observations.
+These two variables are drawn from a domain of $p$ variables with population covariance $\Sigma$.
+Define the population correlation for the pair $(i,j)$ as $\rho_{ij}=\Sigma_{ij}/\sqrt{\Sigma_{ii}\Sigma_{jj}}$, and let $\sigma_{\mathrm{crud}}^2$ denote the variance of $\rho_{ij}$ when $(i,j)$ is drawn uniformly at random from all $\binom{p}{2}$ pairs.
+The quantity $\sigma_{\mathrm{crud}}$ characterizes the spread of background correlations in the domain and can be estimated from large published datasets or reference analyses.
+(When $K$ principal components have been removed, one uses the residual correlations $\rho^{(K)}_{ij}$ and the corresponding $\sigma_{\mathrm{crud}}^{(K)}$.)
+
+\begin{theorem}[Parametric crud-aware test]\label{thm:parametric-crud}
+Suppose the pair $(I,J)$ is drawn uniformly at random from $\{(a,b): 1\le a<b\le p\}$, and conditionally on $(I,J)$, the sample correlation $\hat\rho$ satisfies
+\begin{equation}\label{eq:sample-corr-approx}
+\hat\rho = \rho_{IJ} + \varepsilon, \qquad \varepsilon\sim\mathcal{N}(0, \sigma_n^2), \qquad \sigma_n^2 = \frac{1-\rho_{IJ}^2}{n-1}\approx\frac{1}{n-1},
+\end{equation}
+where $\varepsilon$ is independent of $(I,J)$ and the approximation $\sigma_n^2\approx 1/(n-1)$ holds when $|\rho_{IJ}|$ is small.
+Further suppose that the population correlation $\rho_{IJ}$, viewed as a random variable over the uniform draw of pairs, satisfies
+\begin{equation}\label{eq:crud-null-dist}
+\rho_{IJ} \sim \mathcal{N}(0, \sigma_{\mathrm{crud}}^2).
+\end{equation}
+Then the marginal distribution of the sample correlation under the crud null is
+\begin{equation}\label{eq:marginal-crud}
+\hat\rho \sim \mathcal{N}\!\left(0,\; \sigma_{\mathrm{crud}}^2 + \frac{1}{n-1}\right).
+\end{equation}
+\end{theorem}
+
+\begin{proof}
+Write $\hat\rho = \rho_{IJ} + \varepsilon$.  By assumption, $\rho_{IJ}\sim\mathcal{N}(0,\sigma_{\mathrm{crud}}^2)$ and $\varepsilon\sim\mathcal{N}(0, 1/(n-1))$, and these are independent (the sampling noise $\varepsilon$ is conditionally independent of the pair identity given $\rho_{IJ}$, and under the Gaussian approximation in~\eqref{eq:sample-corr-approx} with $\sigma_n^2\approx 1/(n-1)$, the conditional variance does not depend on $\rho_{IJ}$).
+The sum of two independent Gaussians is Gaussian with variance equal to the sum of variances:
+\begin{equation}
+\Var(\hat\rho) = \Var(\rho_{IJ}) + \Var(\varepsilon) = \sigma_{\mathrm{crud}}^2 + \frac{1}{n-1}.
+\end{equation}
+Both components have zero mean, so $\E[\hat\rho]=0$, yielding~\eqref{eq:marginal-crud}.
+\end{proof}
+
+\paragraph{The crud-aware $z$-test.}
+Theorem~\ref{thm:parametric-crud} yields a direct test statistic. For an observed correlation $r$ with sample size $n$ and domain crud level $\sigma_{\mathrm{crud}}$, define
+\begin{equation}\label{eq:z-crud}
+z_{\mathrm{crud}} = \frac{|r|}{\sqrt{\sigma_{\mathrm{crud}}^2 + \frac{1}{n-1}}},
+\end{equation}
+with two-sided p-value $p_{\mathrm{crud}} = 2\,\Ph(-z_{\mathrm{crud}})$.
+For comparison, the classical correlation test uses $z_{\mathrm{classical}}=|r|\sqrt{n-1}$, which is the special case $\sigma_{\mathrm{crud}}=0$: it tests against the null of zero population correlation, ignoring that a nonzero correlation may be entirely typical of the domain background.
+
+\paragraph{When the correction matters.}
+The ratio of the two test statistics is
+\begin{equation}
+\frac{z_{\mathrm{crud}}}{z_{\mathrm{classical}}} = \frac{1}{\sqrt{1 + (n-1)\,\sigma_{\mathrm{crud}}^2}}.
+\end{equation}
+When $n$ is small relative to $1/\sigma_{\mathrm{crud}}^2$, this ratio is close to 1 and the crud correction is modest---though it still raises the significance threshold, reflecting that a correlation of $r=0.3$ in a field with $\sigma_{\mathrm{crud}}=0.15$ is less remarkable than the same $r$ in a field with negligible background.
+When $n$ is large, the sampling variance $1/(n-1)$ shrinks but the crud variance does not.
+A study with $n=200$ and $r=0.15$ yields $p<0.05$ classically, yet $p_{\mathrm{crud}}\approx 0.37$ when $\sigma_{\mathrm{crud}}=0.15$: the observed association is entirely typical of the domain background.
+In this regime, the classical test is detecting crud, not signal.
+
+\paragraph{Assumptions and practical guidance.}
+The derivation relies on two approximations.
+First, the Gaussian model~\eqref{eq:crud-null-dist} for the distribution of population correlations over random pairs.
+This is supported by the empirical observation (Section~\ref{app:crud-aware-pvalues} and the normality audit in the main text) that residual correlations are well-approximated by a Gaussian after removing top principal components.
+Second, the linearization $\sigma_n^2\approx 1/(n-1)$, which is standard for $|\rho|$ not too close to $\pm 1$ and $n$ not too small.
+
+In practice, $\sigma_{\mathrm{crud}}$ must be estimated from external data, introducing additional uncertainty.
+We recommend reporting the conclusion for a range of plausible $\sigma_{\mathrm{crud}}$ values as a sensitivity analysis.
+When a large reference dataset is available, the full empirical calibration of Section~\ref{app:crud-aware-pvalues} is preferable.
+The parametric version is intended for the common setting where only summary statistics are at hand---a simple corrective to the standard practice of testing against the independence null alone.
+
+
+\subsection{Eigenvector delocalization assumption}
+
+To connect the eigenvalue spectrum to typical pairwise correlations, we need that eigenvectors are
+not concentrated on small sets of coordinates.
+
+\begin{assumption}[Haar-like eigenvectors / delocalization]\label{ass:haar}
+The eigenvector matrix $V$ is distributed as a Haar-uniform random orthogonal matrix, independent of
+$\Lambda$, or (more generally) satisfies the moment bounds of Haar orthogonal matrices:
+for all $i\neq j$ and all $k$,
+\begin{equation}
+\E[v_{ik}]=0,\qquad \E[v_{ik}^2]=\frac{1}{p},\qquad
+\E[v_{ik}^2v_{jk}^2]=\frac{1}{p(p+2)}.
+\end{equation}
+Additionally, cross-component correlations are negligible in the sense that the covariance of
+$v_{ik}v_{jk}$ and $v_{i\ell}v_{j\ell}$ for $k\neq \ell$ contributes only lower-order terms
+($O(p^{-3})$) to the variance calculations below.
+\end{assumption}
+
+Assumption~\ref{ass:haar} is standard in random matrix theory as a proxy for ``incoherent'' or
+``delocalized'' eigenvectors. Empirically, it is supported when no small subset of variables dominates
+principal components.
+
+\paragraph{Remark (localized crud).}
+If eigenvectors are partially localized or block-structured, the same calculations imply that crud may be
+localized rather than global: typical residual correlations can remain large within blocks even if global
+random-pair correlations are smaller.
+
+\subsection{Theorem A.1: crud scale after removing top-$K$ principal components}
+
+\begin{theorem}[Crud scale under top-$K$ PC removal]\label{thm:crud-scale}
+Assume Assumption~\ref{ass:haar}. Fix $K\in\{0,\ldots,p-1\}$ and define tail sums
+\begin{equation}
+S_1(K) := \sum_{k>K}\lambda_k,\qquad S_2(K) := \sum_{k>K}\lambda_k^2.
+\end{equation}
+Then for a uniformly random pair $(i,j)$ with $i\neq j$,
+\begin{equation}
+\SD\!\left(\rho^{(K)}_{ij}\right) = \frac{\sqrt{S_2(K)}}{S_1(K)}\cdot \bigl(1+o_p(1)\bigr),
+\end{equation}
+as $p\to\infty$ (with $K$ allowed to grow with $p$, provided $K<p$ and the tail is nontrivial).
+Equivalently, the typical residual correlation magnitude across random feature pairs is controlled by
+\begin{equation}
+\sigma_K := \frac{\sqrt{\sum_{k>K}\lambda_k^2}}{\sum_{k>K}\lambda_k}.
+\end{equation}
+\end{theorem}
+
+\begin{proof}
+Write the off-diagonal residual covariance entry as
+\begin{equation}
+\Sigma^{(K)}_{ij}=\sum_{k>K}\lambda_k v_{ik}v_{jk},\qquad i\neq j.
+\end{equation}
+By symmetry under Assumption~\ref{ass:haar}, $\E[v_{ik}v_{jk}]=0$, hence $\E[\Sigma^{(K)}_{ij}]=0$.
+
+For the variance, expand
+\begin{equation}
+\Var(\Sigma^{(K)}_{ij})
+= \sum_{k>K}\lambda_k^2 \Var(v_{ik}v_{jk})
++ 2\sum_{K<k<\ell}\lambda_k\lambda_\ell\,\Cov(v_{ik}v_{jk},v_{i\ell}v_{j\ell}).
+\end{equation}
+Under the Haar moment bounds,
+\begin{equation}
+\Var(v_{ik}v_{jk})=\E[v_{ik}^2v_{jk}^2]-\E[v_{ik}v_{jk}]^2=\frac{1}{p(p+2)}.
+\end{equation}
+The cross-component covariance term is of smaller order (Assumption~\ref{ass:haar}),
+so
+\begin{equation}
+\Var(\Sigma^{(K)}_{ij})=\frac{1}{p(p+2)}\sum_{k>K}\lambda_k^2\cdot \bigl(1+o(1)\bigr),
+\end{equation}
+and therefore
+\begin{equation}
+\SD(\Sigma^{(K)}_{ij})=\frac{1}{p}\sqrt{S_2(K)}\cdot \bigl(1+o(1)\bigr).
+\end{equation}
+
+Next, consider the diagonal:
+\begin{equation}
+\Sigma^{(K)}_{ii}=\sum_{k>K}\lambda_k v_{ik}^2.
+\end{equation}
+Taking expectations gives
+\begin{equation}
+\E[\Sigma^{(K)}_{ii}]=\sum_{k>K}\lambda_k\E[v_{ik}^2]=\frac{1}{p}S_1(K).
+\end{equation}
+Under Assumption~\ref{ass:haar}, $\Sigma^{(K)}_{ii}$ concentrates around its mean with relative
+fluctuations $o_p(1)$ (a standard consequence of bounded fourth moments and orthogonality).
+Hence
+\begin{equation}
+\sqrt{\Sigma^{(K)}_{ii}\Sigma^{(K)}_{jj}}=\frac{1}{p}S_1(K)\cdot \bigl(1+o_p(1)\bigr).
+\end{equation}
+
+Finally, for $i\neq j$,
+\begin{equation}
+\rho^{(K)}_{ij}
+=\frac{\Sigma^{(K)}_{ij}}{\sqrt{\Sigma^{(K)}_{ii}\Sigma^{(K)}_{jj}}}
+=\frac{\Sigma^{(K)}_{ij}}{\frac{1}{p}S_1(K)}\cdot \bigl(1+o_p(1)\bigr).
+\end{equation}
+Taking standard deviations and substituting the expression for $\SD(\Sigma^{(K)}_{ij})$ yields
+\begin{equation}
+\SD(\rho^{(K)}_{ij})
+=\frac{\frac{1}{p}\sqrt{S_2(K)}}{\frac{1}{p}S_1(K)}\cdot \bigl(1+o_p(1)\bigr)
+=\frac{\sqrt{S_2(K)}}{S_1(K)}\cdot \bigl(1+o_p(1)\bigr).
+\end{equation}
+\end{proof}
+
+\begin{corollary}[Power-law eigenvalues imply slow decay in $K$]\label{cor:powerlaw}
+Assume $\lambda_k = c k^{-\alpha}$ for $k=1,\ldots,p$ with $c>0$ and $\alpha>1/2$,
+and assume the conditions of Theorem~\ref{thm:crud-scale}. Then for $1\ll K\ll p$,
+the crud scale $\sigma_K=\sqrt{S_2(K)}/S_1(K)$ satisfies:
+\begin{itemize}
+\item If $\alpha=1$, then $\sigma_K \asymp \dfrac{1}{\sqrt{K}\,\log(p/K)}$.
+\item If $\alpha>1$, then $\sigma_K \asymp \dfrac{1}{\sqrt{K}}$.
+\item If $1/2<\alpha<1$, then $\sigma_K \asymp \dfrac{1}{\sqrt{K}}\left(\dfrac{K}{p}\right)^{1-\alpha}$.
+\end{itemize}
+Here $a_K\asymp b_K$ means $a_K/b_K$ is bounded above and below by positive constants depending
+only on $(c,\alpha)$.
+\end{corollary}
+
+\begin{proof}
+By Theorem~\ref{thm:crud-scale}, it suffices to compute asymptotics of $S_1(K)$ and $S_2(K)$.
+Approximate sums by integrals.
+
+If $\alpha=1$:
+$S_1(K)=c\sum_{k=K+1}^p k^{-1}\asymp c\log(p/K)$ and
+$S_2(K)=c^2\sum_{k=K+1}^\infty k^{-2}\asymp c^2/K$.
+Thus $\sigma_K\asymp (c/\sqrt{K})/(c\log(p/K))$.
+
+If $\alpha>1$:
+$S_1(K)\asymp c\int_K^\infty x^{-\alpha}dx \asymp c K^{1-\alpha}$ and
+$S_2(K)\asymp c^2\int_K^\infty x^{-2\alpha}dx \asymp c^2 K^{1-2\alpha}$,
+so $\sigma_K\asymp K^{-1/2}$.
+
+If $1/2<\alpha<1$:
+$S_1(K)\asymp c\int_K^p x^{-\alpha}dx \asymp c\,(p^{1-\alpha}-K^{1-\alpha})\asymp c\,p^{1-\alpha}$
+and $S_2(K)\asymp c^2 K^{1-2\alpha}$, giving
+$\sigma_K\asymp (c K^{(1-2\alpha)/2})/(c p^{1-\alpha})
+=\frac{1}{\sqrt K}\left(\frac{K}{p}\right)^{1-\alpha}$.
+\end{proof}
+
+\subsection{Theorem A.2: limits of association-only causal decisions}
+
+We now formalize a limitation of procedures that treat small adjusted associations as evidence for direct causation.
+
+\begin{theorem}[Association-only decisions cannot be reliable below the crud scale]\label{thm:assoc-only}
+Fix $K$ and consider a uniformly random feature pair $(i,j)$ with $i\neq j$.
+Suppose the analyst compresses the data to a one-dimensional adjusted association statistic
+$T_{ij}$ (for example $T_{ij}=\hat\rho^{(K)}_{ij}$) and uses a decision rule
+$\delta:\R\to\{0,1\}$ where $\delta(T_{ij})=1$ means ``direct causal edge present''.
+
+Assume a stylized mixture model:
+\begin{align}
+H_0\ (\text{no direct edge}):\quad & T_{ij} \sim N(0,\sigma_K^2),\\
+H_1\ (\text{direct edge}):\quad & T_{ij} \sim N(\mu,\sigma_K^2),
+\end{align}
+where $\sigma_K$ is the crud scale from Theorem~\ref{thm:crud-scale} and $\mu$ is the mean shift induced
+by the direct causal effect after generic adjustment.
+
+Then (for equal prior probabilities on $H_0$ and $H_1$) the minimum achievable misclassification error is
+\begin{equation}
+\inf_{\delta}\ \PP\bigl(\delta(T_{ij})\ \text{is wrong}\bigr)
+= \Ph\!\left(-\frac{|\mu|}{2\sigma_K}\right).
+\end{equation}
+In particular, if $|\mu|\le c\,\sigma_K$, then
+\begin{equation}
+\inf_{\delta}\ \PP\bigl(\delta(T_{ij})\ \text{is wrong}\bigr)\ \ge\ \Ph(-c/2),
+\end{equation}
+a constant bounded away from $0$ independent of sample size.
+\end{theorem}
+
+\begin{proof}
+Under the stated model, $T_{ij}$ follows one of two normal distributions with equal variance:
+$N(0,\sigma_K^2)$ under $H_0$ and $N(\mu,\sigma_K^2)$ under $H_1$.
+By the Neyman--Pearson lemma, the likelihood ratio test is optimal. For equal priors and $\mu>0$,
+the optimal threshold is $t^\star=\mu/2$ (symmetrically $-\mu/2$ for $\mu<0$). Then
+\begin{align}
+\PP(\text{error}\mid H_0) &= \PP(T_{ij}>\mu/2\mid H_0) = 1-\Ph\!\left(\frac{\mu}{2\sigma_K}\right),\\
+\PP(\text{error}\mid H_1) &= \PP(T_{ij}\le\mu/2\mid H_1) = \Ph\!\left(-\frac{\mu}{2\sigma_K}\right).
+\end{align}
+These are equal, so the Bayes error equals $\Ph(-\mu/(2\sigma_K))$. Replacing $\mu$ by $|\mu|$ handles both signs.
+The second inequality follows immediately if $|\mu|\le c\sigma_K$.
+\end{proof}
+
+\paragraph{Remark (the bound is a benchmark, not always a lower bound).}
+The equal-variance Gaussian model provides the cleanest impossibility benchmark.
+If additional structure such as variance changes is also present under $H_1$, identification may become easier (if signal pairs have distinctive variance) or harder (if the variance change increases overlap).
+The mean-shift formulation isolates the most basic obstruction: when the causal signal in adjusted-correlation units is comparable to the background scale, no thresholding rule on $T_{ij}$ alone can reliably separate signal from noise.
+
+\paragraph{Remark (rare edges make the problem worse).}
+If the prior probability of a direct causal edge is $\pi\ll 1$, then even when $|\mu|/\sigma_K$ is moderate,
+the positive predictive value of any thresholding rule can remain small.
+Theorem~\ref{thm:assoc-only} isolates the more basic point: when $|\mu|$ is on the order of the crud scale,
+no association-only rule can achieve low error.
+
+\paragraph{Remark (robustness of the limit).}
+The Gaussian mixture model is a stylized proxy for association-only workflows that compress each pair to a
+one-dimensional statistic. The qualitative limit depends on signal-to-noise: if the causal signal is not
+large relative to the background scale, discrimination is poor. Unequal variances or heavier-tailed
+distributions only make separation harder, and any rule that discards multivariate structure is subject
+to the same basic limitation.
+
+\subsection{Robustness of the assumptions}
+\label{app:approx-robust}
+
+The theorems above use idealized assumptions---Haar-like eigenvectors, diagonal concentration, and a Gaussian mixture---to obtain closed-form expressions. Real datasets exhibit moderate eigenvector localization, finite-$p$ effects, and heavy-tailed residuals. These deviations mainly affect constants and tail behavior, not the qualitative conclusions. When eigenvectors are partially localized, the spectrum-only formula in Theorem~\ref{thm:crud-scale} typically becomes conservative (localization increases diagonal heterogeneity, reducing average off-diagonal energy). The Gaussian error curve in Theorem~\ref{thm:assoc-only} is likewise a benchmark: heavy-tailed backgrounds only increase overlap for a fixed mean shift. Appendix~\ref{app:assumption-audit} audits these assumptions empirically across all nine datasets and confirms that the spectral prediction tracks the observed residual SD and that qualitative conclusions are robust.

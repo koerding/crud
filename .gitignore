@@ -3,24 +3,16 @@
 __pycache__/
 *.pyc
 
-# Downloaded data & caches
-cached_data/
-nhanes_xpt/
-cifar10_extracted/
-cifar-10-python.tar.gz
-HEXACO.zip
-HEXACO_extracted/
-PrecinctData.tab
-medians.csv
-kay_images.npz
-stringer_spontaneous.npy
-physionet2012_*.zip
-physionet2012_extracted/
-fmri_haxby_cache/
-openneuro_ds000030_cache/
+# Data (downloads, caches, processed matrices)
+data/
 
-# Generated outputs
+# Generated analysis outputs
 figures/
-figures.html
-figures_vector.tar.gz
-analysis_checkpoint.json
+figures_audit/
+
+# LaTeX build artifacts
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.log
+paper/*.out

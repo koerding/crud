@@ -1,0 +1,56 @@
+\subsection{Crud-aware calibration}
+
+\paragraph{Normative implication.} The minimum reporting standard for small-effect observational claims should be to compare any adjusted association to the background distribution produced by the same preprocessing and adjustment pipeline. Standard iid-based correlation tests ask whether an association differs from zero, not whether it is unusual relative to the domain's background correlations. In large datasets this produces a predictable failure mode: many associations have tiny $p$-values even when their magnitudes are typical for the domain. The relevant quantity is therefore a crud-aware percentile (or $p$-value) computed against a domain-calibrated empirical null. For a target pair $(i,j)$ with an adjusted association statistic (for example, a residual correlation after removing $K$ PCs), we compare its absolute value to the empirical distribution of absolute adjusted associations over uniformly sampled feature pairs from the same dataset, computed under the identical preprocessing and adjustment pipeline. The resulting crud-aware $p$-value is the fraction of random pairs whose absolute adjusted association exceeds the target's; the crud percentile is its complement (estimated by Monte Carlo sampling). The comparison is magnitude-based (two-sided): we rank by absolute value. For a uniformly random target pair processed through the same pipeline, this empirical $p$-value is (approximately) uniform by construction (Appendix~\ref{app:bridge-lemmas}). For non-randomly chosen targets, it should be interpreted as a calibration score against the domain background rather than as a classical Type-I-error guarantee. Practically, reporting an adjusted association should include its percentile within the crud distribution; associations that do not exceed a high percentile (for example, the 95th or 99th) should be described as typical background dependence, even if their iid $p$-values are tiny.
+
+\paragraph{Distinction from multiple testing.} Unlike multiple-testing corrections, which assume a sharp null of zero effect, the crud percentile calibrates against a background of real nonzero dependencies induced by latent structure; it is a domain-calibrated baseline for interpretability, not an error-control device.
+
+\paragraph{Stratified calibration.} When dependence is heterogeneous, sample random pairs within the relevant comparison class (same modality, ROI, gene family, measurement type) so the baseline matches the target claim, and report which stratum was used.
+
+\subsection{A parametric crud-aware test for small studies}
+
+The empirical calibration above requires a data matrix large enough to estimate the background distribution of pairwise associations.
+Many studies, however, measure only a handful of variables on a small sample---a psychologist recruiting $n=20$ participants and computing a single correlation, for instance.
+Such a study can be understood as observing a small submatrix of the much larger data matrix one \emph{could} have collected had the budget permitted measuring all variables in the domain.
+The crud factor operates at the level of the full domain: if the typical background correlation among personality measures is $\sigma_{\mathrm{crud}}\approx 0.15$, that background does not disappear simply because the investigator chose to measure only two of them.
+
+The observed sample correlation $r$ differs from the true population correlation $\rho$ because of sampling noise, and $\rho$ itself differs from zero because of background dependence. These are two independent sources of variability, and both contribute to the spread of $r$. Under a Gaussian approximation (Theorem~\ref{thm:parametric-crud} in Appendix~\ref{app:bridge-lemmas}), the total variance of $r$ for a random pair from the domain is the sum of these two contributions: $\mathrm{Var}(r) \approx \sigma_{\mathrm{crud}}^2 + 1/(n-1)$, where $\sigma_{\mathrm{crud}}^2$ is the variance of true correlations across random pairs (the crud) and $1/(n-1)$ is the sampling variance for each pair.
+This yields a direct test statistic: for an observed correlation $r$ with sample size $n$ and domain crud level $\sigma_{\mathrm{crud}}$,
+\[
+z_{\mathrm{crud}} = \frac{|r|}{\sqrt{\sigma_{\mathrm{crud}}^2 + \frac{1}{n-1}}},
+\]
+with two-sided p-value $p_{\mathrm{crud}} = 2\,\Ph(-z_{\mathrm{crud}})$.
+The classical correlation test uses $z_{\mathrm{classical}}=|r|\sqrt{n-1}$, which is the special case $\sigma_{\mathrm{crud}}=0$: it tests against the null of zero population correlation, ignoring that a nonzero correlation may be entirely typical of the domain background.
+
+When $n$ is large, the sampling variance $1/(n-1)$ shrinks but the crud variance does not.
+A study with $n=200$ and $r=0.15$ yields $p<0.05$ classically, yet $p_{\mathrm{crud}}\approx 0.37$ when $\sigma_{\mathrm{crud}}=0.15$: the observed association is entirely typical of the domain background.
+In this regime, the classical test is detecting crud, not signal.
+
+\paragraph{Diminishing returns beyond $n \approx 1/\sigma_{\mathrm{crud}}^2$.}
+The crud-aware framework also yields a concrete insight about sample size.
+The $z$-test denominator $\sqrt{\sigma_{\mathrm{crud}}^2 + 1/(n-1)}$ reveals a natural crossover.
+When $n$ is small (specifically $n \ll 1/\sigma_{\mathrm{crud}}^2$), sampling noise is the dominant source of uncertainty, so larger samples genuinely increase power to detect effects. But once $n$ is large enough that the sampling noise $1/(n-1)$ becomes small relative to the crud variance $\sigma_{\mathrm{crud}}^2$, the denominator is approximately $\sigma_{\mathrm{crud}}$ regardless of $n$: the bottleneck is no longer imprecise estimation but the fact that background correlations are themselves nonzero. Additional observations measure the crud more precisely but do not help separate signal from background.
+Because $\sigma_{\mathrm{crud}} \approx 0.02$--$0.14$ across the domains in Table~\ref{tab:crud-scale} (at $K=10$), the crossover occurs at roughly $n \approx 50$--$2{,}500$.
+Beyond this point, classical $p$-values continue to shrink---explaining why massive studies routinely report ``significant'' but tiny effects---while the crud-aware $p$-value plateaus.
+For the purpose of distinguishing small associations from background dependence, there are sharply diminishing returns to collecting more than a few thousand observations per study.
+
+\begin{center}
+\fbox{\parbox{0.92\textwidth}{
+\textbf{How to use the crud-aware $z$-test.}
+\begin{enumerate}
+\item Obtain the sample correlation $r$ and sample size $n$ from the study.
+\item Look up a domain-appropriate crud scale $\sigma_{\mathrm{crud}}$: use the residual correlation SD from a large reference dataset in your field (Table~\ref{tab:crud-scale} reports values for various domains at $K=10$), or consult published values.
+\item Compute $z_{\mathrm{crud}} = |r|/\sqrt{\sigma_{\mathrm{crud}}^2 + 1/(n-1)}$ and compare to standard normal critical values ($z>1.96$ for two-sided $p<0.05$). Report the crud-aware $p$-value alongside the classical one.
+\end{enumerate}
+We recommend reporting conclusions for a range of plausible $\sigma_{\mathrm{crud}}$ values as a sensitivity analysis.
+When a large reference dataset is available, the full empirical calibration is preferable.
+}}
+\end{center}
+
+\subsection{Worked examples}
+\label{sec:worked-examples}
+
+\paragraph{A large effect that clears the crud scale.} In the HEXACO personality inventory ($p=242$ items, $n=100{,}000$), items within the same personality facet are designed to measure the same underlying trait. The median within-facet correlation is $|r|=0.32$ at $K=0$, and 55\% of within-facet pairs fall in the top 5\% of the crud distribution ($11\times$ enrichment over chance). Applying the crud-aware $z$-test with $\sigma_{\mathrm{crud}} = 0.144$ (HEXACO at $K=0$) gives $z_{\mathrm{crud}} = 2.2$ for the median pair, $p_{\mathrm{crud}} = 0.03$. After removing 10~PCs, 29\% of within-facet pairs remain in the top 5\% ($6\times$ enrichment). Known-strong associations survive the calibration.
+
+\paragraph{A small effect that does not.} In \citet{liu2022}, multivariable models report a nominally significant association between folate and mortality in adults with T2D (folate quartile 1 vs 2 HR 1.17, 95\% CI 1.01--1.37) in an NHANES-derived cohort of adults with type~2 diabetes ($n \approx 8{,}000$). Converting from the reported confidence interval via $z = \log(\mathrm{HR})/\mathrm{SE}(\log\mathrm{HR})$ and $r \approx z/\sqrt{n}$ gives $r \approx 0.02$, giving $p_{\mathrm{classical}} \approx 0.04$. Applying the crud-aware $z$-test with $\sigma_{\mathrm{crud}} = 0.093$ (NHANES at $K=10$) gives $z_{\mathrm{crud}} = 0.24$, $p_{\mathrm{crud}} = 0.81$. Even this barely significant classical result becomes a crud-aware $p$-value of $0.81$: the effect sits squarely in the middle of the domain's background correlation distribution, indistinguishable from a randomly chosen variable pair. For comparison, known strong biomarker pairs in the same dataset (hemoglobin vs hematocrit, $r=0.91$; ALT vs AST, $r=0.83$) easily clear the crud scale.
+
+Additional worked examples are in SI Appendix~\ref{app:additional-examples}: NHANES biomarkers (positive---known mechanistic pairs clear the crud scale easily) and GTEx RNA-seq (negative---most reported cis-eQTL effects do not).

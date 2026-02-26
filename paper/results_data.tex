@@ -1,0 +1,60 @@
+\section{Results}
+
+\subsection{Datasets}
+
+We analyze nine large datasets spanning neuroscience, genomics, psychology, political science, vision, and population health (Figure~\ref{fig:datasets}): NHANES \citep{nhanes}, precinct-level 2016 voting returns merged with U.S.\ Census demographics \citep{hill2019}, GTEx v8 RNA-seq \citep{gtex2020}, Allen Institute mouse brain RNA-seq \citep{tasic2018}, HEXACO \citep{ashton2004}, CIFAR-10 \citep{krizhevsky2009}, Kay/Vim-1 fMRI \citep{kay2008}, Haxby fMRI \citep{haxby2001}, and Stringer mouse V1 \citep{stringer2019}. We focus on settings with large samples and many features because the dependence structure we study becomes easiest to characterize when sampling noise is small. These datasets allow us to measure the distribution of pairwise correlations across uniformly sampled feature pairs, how classical correlation significance behaves at typical sample sizes, and the eigenvalue spectrum that governs how much broad shared variation can be removed by low-rank adjustment.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.4\textwidth]{figures/fig1_datasets.pdf}
+\caption{A set of large datasets used to study the correlational structure in typical modern science domains.}
+\label{fig:datasets}
+\end{figure}
+
+\subsection{Empirical finding: broad correlations persist after adjustment}
+
+We first ask how correlated features typically are. If direct causal links are sparse, then uniformly sampled feature pairs are unlikely to be directly connected, so we would expect many correlations near zero after routine preprocessing. Instead, we observe a broad spread of correlations for random pairs (Figure~\ref{fig:corr-dist}, left; Table~\ref{tab:crud-scale}). Given the large sample sizes, classical iid-based correlation tests label a large fraction of these correlations as nominally significant, even though most random pairs are implausible candidates for direct causal relations. After PC regression (Methods; main figures use $K=10$ with sensitivity across $K$ in Table~\ref{tab:crud-scale}), the residual correlation distribution remains wide (Figure~\ref{fig:corr-dist}, right; Table~\ref{tab:crud-scale}). The core empirical fact is that the background correlation distribution is wide even after generic adjustment, so ``significant'' does not mean ``distinctive.'' This is not a multiple-testing or ``$p$ is not effect size'' point: even ignoring $p$-values entirely, the typical residual correlation scale after generic adjustment is substantial, so small adjusted associations are not distinctive evidence in the first place. Supplementary analyses compare PC regression to alternative adjustment strategies (e.g., covariate regression on randomly selected variables and sparse regression); results are reported in Appendix~\ref{app:alt-adjust}. A counterexample would be a domain where a realistic adjustment used by practitioners collapses the residual correlation distribution, implying a rapidly decaying $\sigma_K$. We did not observe this in the domains studied here.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.48\textwidth]{figures/fig2_left.pdf}%
+\hfill
+\includegraphics[width=0.48\textwidth]{figures/fig2_right.pdf}
+\caption{\textbf{Broad distributions of correlations persist after generic low-rank adjustment.} Left: distribution of pairwise correlations across uniformly sampled feature pairs before adjustment ($K=0$). Right: the same distribution after regressing each feature on the top $K=10$ principal component scores. Dotted vertical lines mark the classical two-sided significance threshold ($p < 0.05$) for each dataset's full sample size; nearly the entire crud distribution exceeds this threshold, illustrating that ``significant'' does not mean ``distinctive.''}
+\label{fig:corr-dist}
+\end{figure}
+
+\begin{table}[ht]
+\centering
+\caption{Off-diagonal correlation spread (SD) after removing the top $K$ principal components. Entries report the standard deviation of off-diagonal correlations across uniformly sampled feature pairs. The spread generally decreases with $K$ but remains nontrivial in all datasets. Non-monotonic increases at $K{=}1$ (CIFAR-10, GTEx) or $K{=}50$ (NHANES, Precinct) reflect redistribution of variance when a dominant component is removed or finite-$p$ effects when $K$ approaches the number of features.}
+\label{tab:crud-scale}
+\small
+\begin{tabular}{l@{\hskip 1.5em}c@{\hskip 1.5em}c@{\hskip 1.5em}c@{\hskip 1.5em}c}
+\toprule
+Dataset & $K=0$ & $K=1$ & $K=10$ & $K=50$ \\
+\midrule
+Kay fMRI     & 0.065 & 0.055 & 0.035 & 0.029 \\
+Haxby fMRI   & 0.175 & 0.150 & 0.077 & 0.038 \\
+NHANES       & 0.115 & 0.102 & 0.093 & 0.117 \\
+CIFAR-10     & 0.191 & 0.212 & 0.105 & 0.064 \\
+Precinct     & 0.166 & 0.159 & 0.136 & 0.293\textsuperscript{\dag} \\
+RNA-Seq      & 0.170 & 0.196 & 0.071 & 0.043 \\
+GTEx         & 0.038 & 0.255 & 0.090 & 0.043 \\
+HEXACO       & 0.144 & 0.125 & 0.046 & 0.040 \\
+Stringer     & 0.035 & 0.031 & 0.021 & 0.021 \\
+\bottomrule
+\multicolumn{5}{l}{\footnotesize \textsuperscript{\dag}Precinct has only $p{=}83$ features; removing 50 of 83 PCs leaves a}\\
+\multicolumn{5}{l}{\footnotesize near-degenerate residual subspace, inflating the residual correlation SD.}
+\end{tabular}
+\end{table}
+
+\subsection{Mechanism: power-law spectra}
+
+The persistence of substantial residual correlations after PC regression raises a basic question: why does removing broad shared variation not shrink the correlation distribution much faster? The answer lies in how shared variance is distributed across principal components. Each PC captures a fraction of the total variance; listing these fractions from largest to smallest gives the ``eigenvalue spectrum.'' If the first few PCs captured nearly all the variance, removing them would eliminate most shared dependence. Instead, across datasets, explained variance decays approximately as a power law (Figure~\ref{fig:spectra}): on log--log axes the spectrum is roughly a straight line, meaning each successive PC captures a fixed fraction less variance than the previous one, so shared variation is distributed across many components rather than concentrated in the first few. This contrasts with the common implicit ``spike'' assumption behind low-rank adjustment: if confounding variance were concentrated in a few dominant components, removing them would collapse the background correlation distribution. Instead, removing the top $K$ PCs eliminates only a modest portion of the dependence structure unless $K$ is large, which is why residual correlations remain broadly distributed even at $K=10$. Broad spectra make slow decay of the crud scale in $K$ an expected outcome, not a surprise. Moreover, choosing a large $K$ is not a remedy: with finite samples, principal components beyond the leading ones are estimated with increasing noise, so removing too many replaces bias with variance and can inflate residual correlations (as visible for Precinct at $K=50$ in Table~\ref{tab:crud-scale}). Robustness checks for alternative explanations of the approximately power-law behavior are reported in Appendix~\ref{app:robustness}. In short, the background dependence in these domains cannot be removed by any low-rank adjustment of practical dimension.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.7\textwidth]{figures/fig3_spectra.pdf}
+\caption{\textbf{Explained-variance spectra are approximately power-law, so correcting for shared variance is hard.} Each point shows how much variance a given PC explains; the axes are logarithmic (powers of 10). A straight line on these axes means a power law: variance decays as $k^{-\alpha}$, where the slope $\alpha$ controls how fast. When $\alpha$ is near 1 (as in most datasets here), variance is spread broadly, so removing the first few PCs leaves most of the shared dependence intact.}
+\label{fig:spectra}
+\end{figure}

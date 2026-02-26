@@ -1,0 +1,267 @@
+\section{Empirical audit of assumptions}
+\label{app:assumption-audit}
+
+Theorems~\ref{thm:crud-scale} and~\ref{thm:assoc-only} rely on idealized assumptions;
+the question is whether these assumptions hold well enough in practice to support the
+qualitative conclusions.
+We test this on nine real-world datasets spanning diverse domains: Kay fMRI (visual neuroscience,
+$n{=}8428$, $p{=}1870$), Haxby fMRI (cognitive neuroscience, $n{=}23612$, $p{=}1452$),
+Stringer neural recordings (mouse cortex, $n{=}7018$, $p{=}6000$),
+NHANES (population health, $n{=}29902$, $p{=}165$),
+CIFAR-10 images ($n{=}30000$, $p{=}3072$),
+precinct-level voting and census demographics ($n{=}28934$, $p{=}83$),
+RNA-Seq gene expression (Allen Institute mouse brain, $n{=}10071$, $p{=}387$),
+GTEx gene expression (human skeletal muscle, $n{=}10000$, $p{=}803$), and
+HEXACO personality inventory ($n{=}22786$, $p{=}242$).
+All datasets are z-scored by feature before analysis; up to $n{=}10000$ samples are
+used per dataset. PCA is performed via randomized SVD with up to 300 components.
+For each test, we report both a diagnostic summary and an interpretation of what
+deviations from the ideal mean for the qualitative message.
+
+\subsection{Test 1: Power-law eigenvalue decay}
+
+Theorem~\ref{thm:crud-scale} and Corollary~\ref{cor:powerlaw} assume that eigenvalues
+follow an approximate power law $\lambda_k \propto k^{-\alpha}$.
+We fit $\log(\lambda_k/\text{total var}) = a - \alpha \log k$ on the first 40 components
+and compare to an exponential model via AIC.
+
+\begin{table}[h]
+\centering
+\caption{Power-law fits on first 40 principal components.}
+\label{tab:powerlaw}
+\begin{tabular}{lccccl}
+\toprule
+Dataset & $\alpha$ & $R^2$ & AIC (power law) & AIC (exponential) & Preferred \\
+\midrule
+NHANES      & 0.63 & 0.992 & $-237$ & $-121$ & power law \\
+Kay fMRI    & 0.67 & 0.984 & $-204$ & $-97$  & power law \\
+Precinct    & 0.70 & 0.985 & $-205$ & $-105$ & power law \\
+Stringer    & 0.74 & 0.987 & $-206$ & $-109$ & power law \\
+HEXACO      & 0.97 & 0.974 & $-155$ & $-70$  & power law \\
+Haxby fMRI  & 1.03 & 0.982 & $-165$ & $-98$  & power law \\
+CIFAR-10    & 1.24 & 0.997 & $-218$ & $-64$  & power law \\
+GTEx        & 1.30 & 0.994 & $-190$ & $-62$  & power law \\
+RNA-Seq     & 1.33 & 0.932 & $-90$  & $-24$  & power law \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+All nine datasets are better described by a power law than an exponential over
+the first 40 components ($\Delta\text{AIC} > 60$ in every case).
+Exponents range from $\alpha \approx 0.63$ (NHANES) to $\alpha \approx 1.33$ (RNA-Seq),
+placing all datasets in the regime $\alpha > 1/2$ required by Corollary~\ref{cor:powerlaw}.
+Most datasets cluster near $\alpha \approx 0.7$--$1.0$, consistent with $1/f$-like
+spectral decay.
+
+\subsection{Test 2: Eigenvector delocalization}
+
+Assumption~\ref{ass:haar} requires that eigenvectors are not concentrated on small
+subsets of coordinates. We measure this via coherence
+$\mu := \max_{i,k} |v_{ik}|$ (ideal: $1/\sqrt{p}$ under Haar),
+the inverse participation ratio $\text{IPR}(k) := \sum_i v_{ik}^4$ (ideal: $1/p$),
+and leverage score uniformity.
+
+\begin{table}[h]
+\centering
+\caption{Eigenvector delocalization diagnostics (top 50 PCs).}
+\label{tab:deloc}
+\begin{tabular}{lccccc}
+\toprule
+Dataset & Coherence & Ideal $1/\sqrt{p}$ & Ratio & Med.\ eff.\ support & $p$ \\
+\midrule
+Stringer    & 0.082 & 0.013 & $6.4\times$ & 1542 & 6000 \\
+GTEx        & 0.194 & 0.035 & $5.5\times$ & 245  & 803 \\
+CIFAR-10    & 0.069 & 0.018 & $3.8\times$ & 1216 & 3072 \\
+Kay fMRI    & 0.118 & 0.023 & $5.1\times$ & 556  & 1870 \\
+Haxby fMRI  & 0.131 & 0.026 & $5.0\times$ & 478  & 1452 \\
+RNA-Seq     & 0.572 & 0.051 & $11.2\times$ & 57  & 387 \\
+HEXACO      & 0.371 & 0.064 & $5.8\times$ & 73   & 242 \\
+NHANES      & 0.439 & 0.078 & $5.6\times$ & 29   & 165 \\
+Precinct    & 0.908 & 0.110 & $8.3\times$ & 12   & 83  \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The degree of delocalization varies systematically with $p$.
+High-dimensional datasets (Stringer, CIFAR-10, GTEx, Kay, Haxby) show moderate delocalization
+with coherence ratios of $3.8$--$6.4\times$ ideal and effective supports spanning
+25--50\% of $p$.
+Low-dimensional datasets (Precinct, NHANES) exhibit substantial localization, with
+coherence ratios up to $8.3\times$ and effective supports well below $p$.
+RNA-Seq shows the most localization ($11.2\times$), consistent with the presence of
+highly co-regulated gene modules.
+As discussed in Section~\ref{app:approx-robust}, localization typically makes the
+spectrum-only formula \emph{conservative} (overestimates typical correlations),
+so the qualitative conclusions of Theorem~\ref{thm:crud-scale} remain valid even where
+eigenvectors are not perfectly delocalized.
+
+\subsection{Test 3: Predicted $\sigma_K$ versus empirical residual correlation SD}
+
+The central prediction of Theorem~\ref{thm:crud-scale} is that the standard deviation
+of off-diagonal residual correlations after removing $K$ PCs is approximately
+$\sigma_K = \sqrt{S_2(K)}/S_1(K)$.
+We compare this spectral prediction to the empirically measured SD of residual
+correlations on a random subset of 500 features.
+
+\begin{table}[h]
+\centering
+\caption{Correlation between predicted $\sigma_K$ and empirical residual correlation SD
+across $K \in \{0,1,2,5,10,20,50,100\}$.}
+\label{tab:sigma-pred}
+\begin{tabular}{lc}
+\toprule
+Dataset & Pearson $r$ (predicted vs.\ empirical) \\
+\midrule
+HEXACO     & 0.997 \\
+Precinct   & 0.997 \\
+Haxby fMRI & 0.996 \\
+NHANES     & 0.987 \\
+GTEx       & 0.987 \\
+Stringer   & 0.952 \\
+Kay fMRI   & 0.942 \\
+CIFAR-10   & 0.880 \\
+RNA-Seq    & 0.639 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+In seven of nine datasets, the spectral prediction tracks the empirical SD with
+$r > 0.94$. CIFAR-10 ($r = 0.88$) and RNA-Seq ($r = 0.64$) show weaker agreement,
+the former due to strong eigenvector structure (spatial image statistics) and the
+latter due to gene-module localization.
+Even where the spectral formula is quantitatively imprecise, the monotonic relationship
+between $K$ and the crud scale is preserved, supporting the qualitative message that
+broad spectra produce slowly decaying background correlations.
+
+\subsection{Test 4: Diagonal concentration of residual covariance}
+
+The proof of Theorem~\ref{thm:crud-scale} requires that the diagonal entries
+$\Sigma^{(K)}_{ii}$ concentrate around their mean $S_1(K)/p$.
+We measure this via the coefficient of variation (CV) of the residual variance
+$\Var_n(X_i^{(K)})$ across features $i$.
+
+\begin{table}[h]
+\centering
+\caption{Coefficient of variation of residual variances across features.}
+\label{tab:diagconc}
+\begin{tabular}{lcccc}
+\toprule
+Dataset & $K{=}0$ & $K{=}1$ & $K{=}10$ & $K{=}50$ \\
+\midrule
+Stringer    & 0.000 & 0.036 & 0.091 & 0.136 \\
+CIFAR-10    & 0.000 & 0.217 & 0.222 & 0.216 \\
+Kay fMRI    & 0.000 & 0.052 & 0.105 & 0.167 \\
+Haxby fMRI  & 0.000 & 0.122 & 0.149 & 0.163 \\
+HEXACO      & 0.000 & 0.097 & 0.171 & 0.220 \\
+GTEx        & 0.000 & 0.303 & 0.516 & 0.689 \\
+NHANES      & 0.177 & 0.234 & 0.456 & 0.811 \\
+RNA-Seq     & 0.000 & 0.550 & 0.544 & 0.320 \\
+Precinct    & 0.000 & 0.177 & 0.589 & 1.127 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The pattern is clear: diagonal concentration holds well for large $p$ and degrades
+predictably as $p$ shrinks and $K$ grows.
+At $K{=}0$ (before PC removal), z-scoring enforces unit variance by construction
+($\text{CV} \approx 0$). As PCs are removed, diagonal heterogeneity increases.
+High-$p$ datasets (Stringer, Kay, Haxby) maintain good concentration
+($\text{CV} < 0.2$) even at $K{=}50$.
+Low-$p$ datasets (Precinct, NHANES) show substantial heterogeneity at large $K$,
+consistent with the finite-$p$ discussion in Section~\ref{app:approx-robust}.
+This diagonal heterogeneity makes the
+Haar-based formula conservative, so the spectrum-only prediction is an upper bound on
+typical off-diagonal correlations in these settings.
+
+\subsection{Test 5: Normality of residual correlations}
+
+Theorem~\ref{thm:assoc-only} models the null distribution of residual associations
+as Gaussian. We assess this by computing the skewness and excess kurtosis
+of the off-diagonal residual correlations.
+
+\begin{table}[h]
+\centering
+\caption{Skewness and excess kurtosis of off-diagonal residual correlations.}
+\label{tab:normality}
+\begin{tabular}{lcccc}
+\toprule
+& \multicolumn{2}{c}{$K{=}0$} & \multicolumn{2}{c}{$K{=}10$} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5}
+Dataset & Skew & Kurt & Skew & Kurt \\
+\midrule
+HEXACO      & 0.07  & 1.94  & 0.26  & 17.36 \\
+GTEx        & $-0.26$ & $-0.35$ & 0.30  & 1.41 \\
+Haxby fMRI  & 0.33  & $-0.34$ & 0.17  & 1.34 \\
+Kay fMRI    & 0.39  & 5.46  & 1.45  & 24.07 \\
+CIFAR-10    & 0.99  & 0.63  & 2.47  & 13.99 \\
+Precinct    & 1.25  & 8.44  & 0.86  & 8.87 \\
+RNA-Seq     & $-1.61$ & 1.96 & 1.98  & 12.61 \\
+Stringer    & 1.98  & 14.49 & 1.23  & 11.00 \\
+NHANES      & 2.99  & 21.43 & 2.90  & 35.58 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Residual correlations are generally right-skewed with positive excess kurtosis
+(heavier tails than Gaussian). GTEx and Haxby fMRI at $K{=}0$ are the closest to Gaussian
+(skew $-0.26$/$0.33$, kurtosis $-0.35$/$-0.34$). NHANES shows the largest departures.
+As noted in Section~\ref{app:approx-robust}, heavy tails increase the overlap
+between null and alternative distributions for a given mean shift,
+so the Gaussian error formula in Theorem~\ref{thm:assoc-only} is optimistic
+about separability---the true error is at least as large.
+
+\subsection{Test 6: Cross-component covariance negligibility}
+
+Assumption~\ref{ass:haar} requires that the covariance of $v_{ik}v_{jk}$ and
+$v_{i\ell}v_{j\ell}$ for $k \neq \ell$ is negligible.
+We estimate this by computing the lag-1 autocorrelation of the product sequence
+$\{v_{ik}v_{jk}\}_{k=1}^K$ across 1000 random variable pairs $(i,j)$.
+
+\begin{table}[h]
+\centering
+\caption{Cross-component covariance: autocorrelation of eigenvector products.}
+\label{tab:crosscomp}
+\begin{tabular}{lccc}
+\toprule
+Dataset & Mean cross-corr & $|\text{mean}|$ & Frac.\ $|r| > 0.1$ \\
+\midrule
+RNA-Seq    & $-0.013$ & 0.013 & 0.493 \\
+CIFAR-10   & $-0.018$ & 0.018 & 0.469 \\
+Kay fMRI   & $-0.019$ & 0.019 & 0.467 \\
+GTEx       & $-0.027$ & 0.027 & 0.483 \\
+Stringer   & $-0.025$ & 0.025 & 0.466 \\
+Haxby fMRI & $-0.024$ & 0.024 & 0.459 \\
+HEXACO     & $-0.028$ & 0.028 & 0.497 \\
+NHANES     & $-0.035$ & 0.035 & 0.552 \\
+Precinct   & $-0.061$ & 0.061 & 0.568 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The mean cross-component correlation is small in magnitude ($< 0.07$) for all
+datasets, with higher-$p$ datasets showing smaller values as expected.
+While roughly half of individual pairs show $|r| > 0.1$, these are centered near
+zero and largely cancel in the variance calculation, consistent with the
+$O(p^{-3})$ bound in Assumption~\ref{ass:haar}.
+
+\subsection{Summary of assumption audit}
+
+The assumptions of Theorems~\ref{thm:crud-scale} and~\ref{thm:assoc-only} hold
+to a reasonable approximation across all nine datasets, with the quality of the
+approximation improving systematically with $p$.
+The key findings are:
+\begin{itemize}
+\item Power-law eigenvalue decay ($\alpha \in [0.63, 1.33]$, $R^2 > 0.93$) is
+  universally preferred over exponential decay.
+\item Eigenvector delocalization is moderate in high-$p$ datasets and degrades
+  gracefully in low-$p$ settings.
+\item The spectral prediction $\sigma_K$ tracks the empirical crud scale with
+  $r > 0.88$ in eight of nine datasets.
+\item Diagonal concentration holds well for large $p$ and degrades predictably
+  for small $p$ and large $K$.
+\item Residual correlations are heavier-tailed than Gaussian, making the error
+  bound in Theorem~\ref{thm:assoc-only} conservative (the true error is at
+  least as large).
+\item Cross-component covariances are small in the mean, supporting the
+  negligibility condition.
+\end{itemize}

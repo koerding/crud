@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRUD Factor Interactive Demo</title>
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<style>
+  :root {
+    --blue: #2563eb;
+    --orange: #ea580c;
+    --gray: #64748b;
+    --bg: #fafafa;
+    --card: #ffffff;
+    --text: #1e293b;
+    --muted: #64748b;
+    --border: #e2e8f0;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+  h1 { font-size: 1.8rem; margin-bottom: 4px; }
+  h1 span { color: var(--orange); }
+  .subtitle { color: var(--muted); font-size: 1rem; margin-bottom: 24px; font-style: italic; }
+  .note { color: var(--muted); font-size: 0.9rem; margin-bottom: 18px; }
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    flex-wrap: wrap;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 24px;
+    margin-bottom: 20px;
+  }
+  .control-group { display: flex; flex-direction: column; gap: 4px; }
+  .control-group label {
+    font-size: 0.85rem;
+    font-weight: bold;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .control-group .value {
+    font-family: 'Courier New', monospace;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--text);
+  }
+  input[type=range] { width: 200px; cursor: pointer; }
+  .presets-header {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .presets {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    margin-top: 2px;
+  }
+  .preset {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.7rem;
+    padding: 2px 7px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--bg);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    line-height: 1.4;
+  }
+  .preset:hover { border-color: var(--orange); color: var(--orange); }
+  .preset.active { border-color: var(--orange); background: #fff7ed; color: var(--orange); }
+  .preset span {
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+  }
+  button#resim {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    padding: 8px 20px;
+    background: var(--blue);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: background 0.15s;
+  }
+  button#resim:hover { background: #1d4ed8; }
+  .sigma-display {
+    font-family: 'Courier New', monospace;
+    font-size: 0.95rem;
+    color: var(--orange);
+    padding: 4px 12px;
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    border-radius: 4px;
+  }
+  .plots {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .plot-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px;
+  }
+  .plot-card .plot { width: 100%; height: 320px; }
+  .counter-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+  .rates-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.85rem;
+  }
+  .rates-table th {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    padding: 4px 8px;
+    border-bottom: 2px solid var(--border);
+  }
+  .rates-table th:nth-child(2) { color: var(--blue); }
+  .rates-table th:nth-child(3) { color: var(--orange); }
+  .rates-table .row-label {
+    text-align: left;
+    font-size: 0.8rem;
+    color: var(--muted);
+    padding: 6px 4px;
+  }
+  .rates-table .rate-cell {
+    font-family: 'Courier New', monospace;
+    font-size: 1.3rem;
+    font-weight: bold;
+    text-align: center;
+    padding: 6px 8px;
+  }
+  .rates-table .power-row { border-top: 1px solid var(--border); }
+  .rate-good { color: #16a34a; }
+  .rate-bad { color: #dc2626; }
+  .rate-ok { color: var(--muted); }
+  .counter-card .detail {
+    font-size: 0.85rem;
+    color: var(--gray);
+    margin-top: 8px;
+    font-style: italic;
+  }
+
+  /* Educational sections */
+  .education { margin-top: 40px; }
+  .education h2 {
+    font-size: 1.4rem;
+    margin-bottom: 16px;
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 8px;
+  }
+  .section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+  }
+  .section h3 {
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+  .section h3 .num {
+    display: inline-block;
+    background: var(--blue);
+    color: white;
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+    text-align: center;
+    border-radius: 50%;
+    font-size: 0.85rem;
+    margin-right: 8px;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+  }
+  .section p { margin-bottom: 8px; color: #334155; }
+  .section code {
+    font-family: 'Courier New', monospace;
+    background: #f1f5f9;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 0.9em;
+  }
+  .formula {
+    display: block;
+    text-align: center;
+    margin: 12px 0;
+    font-family: 'Courier New', monospace;
+    font-size: 1rem;
+    color: var(--text);
+  }
+  @media (max-width: 768px) {
+    .plots { grid-template-columns: 1fr; }
+    .controls { gap: 16px; }
+    input[type=range] { width: 140px; }
+  }
+</style>
+</head>
+<body>
+
+<h1>The <span>Crud</span> Factor</h1>
+<p class="subtitle">Traditional p-values can be tiny even when an association is entirely typical of the domain’s background dependence. Broad, power-law spectra spread shared variance across many dimensions, so generic adjustment doesn’t erase crud and larger N just measures it more precisely. The implication is a hard limit for association-only causal claims: when signals are comparable to the crud scale, no statistical threshold can reliably separate signal from background.</p>
+
+<div class="controls">
+  <div class="control-group">
+    <label>Sample size (N)</label>
+    <input type="range" id="sliderN" min="1.477" max="4" step="0.01" value="2.3">
+    <span class="value" id="valN">200</span>
+  </div>
+  <div class="control-group">
+    <label>Variables (p)</label>
+    <input type="range" id="sliderP" min="10" max="100" step="1" value="30">
+    <span class="value" id="valP">30</span>
+  </div>
+  <div class="control-group">
+    <label>Spectrum slope (&alpha;)</label>
+    <input type="range" id="sliderAlpha" min="0.6" max="1.6" step="0.02" value="1.0">
+    <span class="value" id="valAlpha">1.00</span>
+    <div class="presets-header">Spectral shape:</div>
+    <div class="presets" id="alphaPresets">
+      <button class="preset" data-alpha="0.8" title="Very broad spectrum">Broad <span>0.8</span></button>
+      <button class="preset active" data-alpha="1.0" title="1/f spectrum">1/f <span>1.0</span></button>
+      <button class="preset" data-alpha="1.3" title="Steeper spectrum">Steep <span>1.3</span></button>
+    </div>
+  </div>
+  <div class="control-group">
+    <label>Target effect (&mu;)</label>
+    <input type="range" id="sliderMu" min="0.00" max="0.50" step="0.01" value="0.20">
+    <span class="value" id="valMu">0.20</span>
+  </div>
+  <button id="resim">Resimulate</button>
+</div>
+
+<div class="plots">
+  <div class="plot-card"><div id="plotHist" class="plot"></div></div>
+  <div class="counter-card" style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 0.8rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em;">Two thresholds (p=0.05), different nulls</div>
+    <table class="rates-table">
+      <thead>
+        <tr><th></th><th>Classical</th><th>Crud-aware</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="row-label">False positive vs crud background</td>
+          <td id="classFPR" class="rate-cell">—</td>
+          <td id="crudFPR" class="rate-cell">—</td>
+        </tr>
+        <tr>
+          <td class="row-label">Miss rate for target effect (&mu;)</td>
+          <td id="classFNR" class="rate-cell">—</td>
+          <td id="crudFNR" class="rate-cell">—</td>
+        </tr>
+        <tr class="power-row">
+          <td class="row-label">Power for target effect</td>
+          <td id="classPower" class="rate-cell">—</td>
+          <td id="crudPower" class="rate-cell">—</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="detail" id="rateNote">Analytic rates for a single target pair (&mu;). The crud scale &sigma;<sub>crud</sub> is derived from the power-law spectrum after generic adjustment.</div>
+    <div class="detail" id="decisionNote"></div>
+    <div class="detail" id="sigDetail"></div>
+  </div>
+  <div class="plot-card"><div id="plotSpec" class="plot"></div></div>
+  <div class="plot-card"><div id="plotPval" class="plot"></div></div>
+  <div class="plot-card"><div id="plotDecision" class="plot"></div></div>
+</div>
+
+<div class="education">
+  <h2>What's going on?</h2>
+
+  <div class="section">
+    <h3><span class="num">1</span> Everything correlates with everything</h3>
+    <p>Paul Meehl called it the <strong>crud factor</strong>: in observational data, everything is weakly linked to everything else. In neuro data, shared physiology and motion correlate voxels; in psych, broad traits tie questionnaire items together; in medical panels, systemic physiology links labs; in omics, pathways and batch effects connect genes.</p>
+    <p>This isn't just measurement error — it's real, background structure. The scale varies by domain and preprocessing. The core point is not a specific number, but that the background is broad and nonzero.</p>
+  </div>
+
+  <div class="section">
+    <h3><span class="num">2</span> Why adjustment doesn&rsquo;t erase crud</h3>
+    <p>Generic adjustment removes broad shared variation. The paper defines the <strong>crud scale</strong> after that adjustment as:</p>
+    <span class="formula">$$\sigma_{\text{crud}} = \frac{\sqrt{\sum \lambda_{\text{tail}}^2}}{\sum \lambda_{\text{tail}}}$$</span>
+    <p>When eigenvalues follow a power law (\(\lambda_k \propto k^{-\alpha}\)), \(\sigma_{\text{crud}}\) shrinks slowly. Removing broad components does not collapse background dependence.</p>
+  </div>
+
+  <div class="section">
+    <h3><span class="num">3</span> Calibrate against the background</h3>
+    <p>Instead of testing \(H_0\!: \rho = 0\), define a background null. In the parametric version the null is:</p>
+    <span class="formula">$$H_0:\ z_{\text{true}} \sim \mathcal{N}(0,\sigma_{\text{crud}}^2), \quad z=\operatorname{atanh}(r)$$</span>
+    <p>That is, the true association for a random pair is drawn from the domain’s background distribution. With large data you can estimate this empirically; here we show the parametric version on the Fisher \(z\) scale:</p>
+    <span class="formula">$$z_{\text{crud}} = \frac{|\!\operatorname{atanh}(r)|}{\sqrt{\sigma_{\text{crud}}^2 + 1/(n-3)}}$$</span>
+    <p>The resulting crud-aware p-value is a <em>calibration score</em> against background dependence, not an iid Type-I-error guarantee.</p>
+  </div>
+
+  <div class="section">
+    <h3><span class="num">4</span> Diminishing returns in N</h3>
+    <p>The sampling term \(1/(n-3)\) shrinks with more data, but \(\sigma_{\text{crud}}\) does not. A rough crossover point is:</p>
+    <span class="formula">$$n^* \approx \frac{1}{\sigma_{\text{crud}}^2} + 3$$</span>
+    <p style="text-align:center; margin-top:-8px; color:var(--muted); font-size:0.9rem;">(here: <strong id="nStarText">—</strong>)</p>
+    <p>Below \(n^*\), sampling noise dominates. Above \(n^*\), you mostly measure background dependence more precisely.</p>
+  </div>
+
+  <div class="section">
+    <h3><span class="num">5</span> A hard limit for association-only claims</h3>
+    <p>The paper proves a decision-theoretic bound: if the causal signal size \(\mu\) is comparable to \(\sigma_{\text{crud}}\), no rule that uses only the association statistic can reliably separate direct causal links from background dependence.</p>
+    <span class="formula">$$\text{error}^* = \Phi\!\left(-\frac{|\mu|}{2\sigma_{\text{crud}}}\right)$$</span>
+    <p>Here \(\Phi\) is the standard normal cumulative distribution function (the area under the normal curve to the left of a value).</p>
+    <p>Design leverage (randomization, instruments, discontinuities, negative controls) can overcome this because it changes the question, not just the threshold.</p>
+  </div>
+</div>
+
+<script>
+// === Seeded PRNG: mulberry32 ===
+function mulberry32(seed) {
+  return function() {
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+// Box-Muller transform using seeded rng
+function gaussianPair(rng) {
+  const u1 = rng(), u2 = rng();
+  const r = Math.sqrt(-2 * Math.log(u1 || 1e-30));
+  const theta = 2 * Math.PI * u2;
+  return [r * Math.cos(theta), r * Math.sin(theta)];
+}
+
+// Normal CDF - Abramowitz & Stegun approximation
+function normalCDF(x) {
+  const a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741;
+  const a4 = -1.453152027, a5 = 1.061405429, p = 0.3275911;
+  const sign = x < 0 ? -1 : 1;
+  x = Math.abs(x) / Math.SQRT2;
+  const t = 1 / (1 + p * x);
+  const y = 1 - ((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+  return 0.5 * (1 + sign * y);
+}
+
+// Two-tailed p-value from z
+function pvalueFromZ(z) {
+  return 2 * (1 - normalCDF(Math.abs(z)));
+}
+
+function fisherZ(r) {
+  const clipped = Math.max(-0.999999, Math.min(0.999999, r));
+  return 0.5 * Math.log((1 + clipped) / (1 - clipped));
+}
+
+function zToR(z) {
+  return Math.tanh(z);
+}
+
+let currentSeed = 42;
+let debounceTimer = null;
+
+const sliderN = document.getElementById('sliderN');
+const sliderP = document.getElementById('sliderP');
+const sliderAlpha = document.getElementById('sliderAlpha');
+const sliderMu = document.getElementById('sliderMu');
+const valN = document.getElementById('valN');
+const valP = document.getElementById('valP');
+const valAlpha = document.getElementById('valAlpha');
+const valMu = document.getElementById('valMu');
+
+function getN() { return Math.round(Math.pow(10, parseFloat(sliderN.value))); }
+function getP() { return parseInt(sliderP.value); }
+function getAlpha() { return parseFloat(sliderAlpha.value); }
+function getMu() { return parseFloat(sliderMu.value); }
+
+function computeEigenvalues(p, alpha) {
+  const lambdas = new Float64Array(p);
+  for (let k = 0; k < p; k++) {
+    lambdas[k] = Math.pow(k + 1, -alpha);
+  }
+  return lambdas;
+}
+
+function computeSigmaK(lambdas, K) {
+  let sum = 0;
+  let sum2 = 0;
+  for (let i = K; i < lambdas.length; i++) {
+    const v = lambdas[i];
+    sum += v;
+    sum2 += v * v;
+  }
+  return Math.sqrt(sum2) / (sum || 1);
+}
+
+// === Simulation ===
+function simulateCorrelations(n, p, seed, sigmaK) {
+  const rng = mulberry32(seed);
+  const nPairs = p * (p - 1) / 2;
+  const cors = new Float64Array(nPairs);
+  const samplingSDZ = Math.sqrt(1 / (n - 3));
+  let idx = 0;
+  for (let i = 0; i < nPairs; i++) {
+    const [g1, g2] = gaussianPair(rng);
+    const zTrue = g1 * sigmaK;
+    const zObs = zTrue + g2 * samplingSDZ;
+    cors[idx++] = Math.tanh(zObs);
+  }
+  return cors;
+}
+
+// === Simulation cache ===
+let cachedCors = null;
+let cacheKey = '';
+
+// === Update plots ===
+function update() {
+  const n = getN();
+  const p = getP();
+  const alpha = getAlpha();
+  const K = Math.min(10, Math.max(0, p - 2));
+  const mu = getMu();
+  const lambdas = computeEigenvalues(p, alpha);
+  const sigmaK = computeSigmaK(lambdas, K);
+  const sigmaKsq = sigmaK * sigmaK;
+  valN.textContent = n.toLocaleString();
+  valP.textContent = p;
+  valAlpha.textContent = alpha.toFixed(2);
+  valMu.textContent = mu.toFixed(2);
+
+  const key = `${n}-${p}-${alpha}-${K}-${currentSeed}`;
+  if (key !== cacheKey) {
+    cachedCors = simulateCorrelations(n, p, currentSeed, sigmaK);
+    cacheKey = key;
+  }
+  const cors = cachedCors;
+
+  // === Analytical FPR / FNR ===
+  // Approximate on Fisher z scale: z = atanh(r)
+  // z_true ~ N(mu, sigma_K^2), z_obs ~ N(z_true, 1/(n-3))
+  const zCrit = 1.959963984540054;
+  const samplingVarZ = 1 / (n - 3);
+  const samplingSDZ = Math.sqrt(samplingVarZ);
+  const totalSDZ = Math.sqrt(sigmaKsq + samplingVarZ);
+
+  // Classical threshold (H0: rho=0): |z_obs| > zCrit * sqrt(1/(n-3))
+  const zCritClass = zCrit * samplingSDZ;
+  const rCrit = zToR(zCritClass);
+  // Crud-aware threshold: |z_obs| > zCrit * totalSDZ
+  const zCritCrud = zCrit * totalSDZ;
+  const rCritCrud = zToR(zCritCrud);
+
+  // False positive vs crud background (null = crud-only)
+  const classFPR = pvalueFromZ(zCritClass / totalSDZ);
+  const crudFPR = pvalueFromZ(zCritCrud / totalSDZ); // = 0.05 by construction
+
+  // Miss rate for target effect mu (on z scale)
+  const zMu = fisherZ(mu);
+  const classFNR = normalCDF((zCritClass - zMu) / totalSDZ) - normalCDF((-zCritClass - zMu) / totalSDZ);
+  const crudFNR = normalCDF((zCritCrud - zMu) / totalSDZ) - normalCDF((-zCritCrud - zMu) / totalSDZ);
+
+  function fmtPct(v) { return (100 * v).toFixed(1) + '%'; }
+  function rateClass(v, isGoodLow) {
+    if (isGoodLow) return v < 0.07 ? 'rate-good' : v < 0.20 ? 'rate-ok' : 'rate-bad';
+    return v > 0.80 ? 'rate-good' : v > 0.50 ? 'rate-ok' : 'rate-bad';
+  }
+
+  const elClassFPR = document.getElementById('classFPR');
+  const elCrudFPR = document.getElementById('crudFPR');
+  const elClassFNR = document.getElementById('classFNR');
+  const elCrudFNR = document.getElementById('crudFNR');
+  const elClassPow = document.getElementById('classPower');
+  const elCrudPow = document.getElementById('crudPower');
+
+  elClassFPR.textContent = fmtPct(classFPR);
+  elClassFPR.className = 'rate-cell ' + rateClass(classFPR, true);
+  elCrudFPR.textContent = fmtPct(crudFPR);
+  elCrudFPR.className = 'rate-cell ' + rateClass(crudFPR, true);
+  elClassFNR.textContent = fmtPct(classFNR);
+  elClassFNR.className = 'rate-cell ' + rateClass(classFNR, true);
+  elCrudFNR.textContent = fmtPct(crudFNR);
+  elCrudFNR.className = 'rate-cell ' + rateClass(crudFNR, true);
+  elClassPow.textContent = fmtPct(1 - classFNR);
+  elClassPow.className = 'rate-cell ' + rateClass(1 - classFNR, false);
+  elCrudPow.textContent = fmtPct(1 - crudFNR);
+  elCrudPow.className = 'rate-cell ' + rateClass(1 - crudFNR, false);
+
+  const ratio = Math.abs(zMu) / (sigmaK || 1e-9);
+  const errorStar = normalCDF(-ratio / 2);
+  document.getElementById('decisionNote').textContent =
+    `Best possible error (association-only): ${fmtPct(errorStar)} when |\u03BC|/\u03C3_crud = ${ratio.toFixed(2)}.`;
+
+  document.getElementById('sigDetail').textContent =
+    classFPR > 0.20 ?
+      'Classical test flags many "effects" even when there is only background structure' :
+    Math.abs(zMu) > sigmaK * 2 ?
+      'Target effect is large relative to crud — both tests can detect it' :
+    Math.abs(zMu) <= sigmaK ?
+      'Target effect is within typical crud range — hard to separate from background' :
+    'Crud-aware test trades some sensitivity for honest control vs background';
+
+  // --- Plot 1: Histogram ---
+  const corsArr = Array.from(cors);
+
+  // Theoretical overlay (small r): N(0, sigma_crud^2 + 1/(n-3))
+  const totalVar = sigmaKsq + samplingVarZ;
+  const totalStd = Math.sqrt(totalVar);
+  const xOverlay = [], yOverlay = [];
+  for (let x = -0.6; x <= 0.6; x += 0.005) {
+    xOverlay.push(x);
+    yOverlay.push(Math.exp(-x * x / (2 * totalVar)) / (totalStd * Math.sqrt(2 * Math.PI)));
+  }
+
+  const histTrace = {
+    x: corsArr, type: 'histogram', nbinsx: 60,
+    histnorm: 'probability density',
+    marker: { color: 'rgba(37,99,235,0.5)', line: { color: 'rgba(37,99,235,0.8)', width: 1 } },
+    name: 'Sample correlations'
+  };
+  const overlayTrace = {
+    x: xOverlay, y: yOverlay, type: 'scatter', mode: 'lines',
+    line: { color: var_orange, width: 2 },
+    name: 'Approx (small r): N(0, \u03C3_crud\u00B2 + 1/(n\u22123))'
+  };
+  // Crud zone
+  const crudBandTrace = {
+    x: [-Math.tanh(sigmaK), -Math.tanh(sigmaK), Math.tanh(sigmaK), Math.tanh(sigmaK)],
+    y: [0, 15, 15, 0],
+    fill: 'toself', fillcolor: 'rgba(100,116,139,0.1)',
+    line: { color: 'rgba(100,116,139,0.3)', width: 1 },
+    type: 'scatter', mode: 'lines',
+    name: 'Crud zone (|r| < tanh(\u03C3_crud))',
+    showlegend: true
+  };
+
+  const histLayout = {
+    title: { text: 'Background Correlation Distribution (after generic adjustment)', font: { size: 14 } },
+    xaxis: { title: 'Sample correlation r', range: [-0.6, 0.6] },
+    yaxis: { title: 'Density' },
+    shapes: [
+      { type: 'line', x0: rCrit, x1: rCrit, y0: 0, y1: 1, yref: 'paper',
+        line: { color: 'red', dash: 'dash', width: 1.5 } },
+      { type: 'line', x0: -rCrit, x1: -rCrit, y0: 0, y1: 1, yref: 'paper',
+        line: { color: 'red', dash: 'dash', width: 1.5 } }
+    ],
+    annotations: [{
+      x: rCrit + 0.02, y: 1, yref: 'paper', text: '\u03B1=.05 (classical)',
+      showarrow: false, font: { color: 'red', size: 10 }
+    }],
+    margin: { t: 40, b: 50, l: 50, r: 20 },
+    showlegend: false
+  };
+
+  Plotly.react('plotHist', [crudBandTrace, histTrace, overlayTrace], histLayout, { responsive: true, displayModeBar: false });
+
+  const nStar = Math.round(1 / sigmaKsq + 3);
+  const nStarEl = document.getElementById('nStarText');
+  if (nStarEl) nStarEl.textContent = nStar.toLocaleString();
+
+  // --- Plot 3: Eigenvalue spectrum ---
+  const ks = [];
+  const eigVals = [];
+  for (let i = 0; i < p; i++) {
+    ks.push(i + 1);
+    eigVals.push(lambdas[i]);
+  }
+  const specTrace = {
+    x: ks, y: eigVals, type: 'scatter', mode: 'lines+markers',
+    name: '\u03BB_k',
+    line: { color: var_orange, width: 2 },
+    marker: { size: 4 }
+  };
+  const specLayout = {
+    title: { text: `Eigenvalue Spectrum (\u03BB_k \u221D k^\u2212${alpha.toFixed(2)})`, font: { size: 14 } },
+    xaxis: { title: 'PC index k', type: 'log' },
+    yaxis: { title: '\u03BB_k', type: 'log' },
+    margin: { t: 40, b: 50, l: 60, r: 20 }
+  };
+  Plotly.react('plotSpec', [specTrace], specLayout, { responsive: true, displayModeBar: false });
+
+  // --- Plot 4: Rejection & Power curves vs N ---
+  const ns = [];
+  for (let logn = 1.477; logn <= 4; logn += 0.02) ns.push(Math.round(Math.pow(10, logn)));
+
+  const classFPRs = [], crudFPRs = [], classPowers = [], crudPowers = [];
+  const zMuCurve = fisherZ(mu);
+  for (const nn of ns) {
+    const sampVarZ = 1 / (nn - 3);
+    const sampSDZ = Math.sqrt(sampVarZ);
+    const totalSDZ = Math.sqrt(sigmaKsq + sampVarZ);
+    const zCritClass = zCrit * sampSDZ;
+    const zCritCrud = zCrit * totalSDZ;
+
+    // FPR vs crud background
+    classFPRs.push(pvalueFromZ(zCritClass / totalSDZ));
+    crudFPRs.push(0.05); // by construction
+
+    // Power = 1 - miss rate for target effect
+    const cFNR = normalCDF((zCritClass - zMuCurve) / totalSDZ) - normalCDF((-zCritClass - zMuCurve) / totalSDZ);
+    const ccFNR = normalCDF((zCritCrud - zMuCurve) / totalSDZ) - normalCDF((-zCritCrud - zMuCurve) / totalSDZ);
+    classPowers.push(1 - cFNR);
+    crudPowers.push(1 - ccFNR);
+  }
+
+  const classFPRTrace = {
+    x: ns, y: classFPRs, type: 'scatter', mode: 'lines',
+    name: 'Classical reject (vs crud)',
+    line: { color: var_blue, width: 2, dash: 'dash' }
+  };
+  const crudFPRTrace = {
+    x: ns, y: crudFPRs, type: 'scatter', mode: 'lines',
+    name: 'Crud-aware (α=0.05)',
+    line: { color: var_orange, width: 2, dash: 'dash' }
+  };
+  const classPowerTrace = {
+    x: ns, y: classPowers, type: 'scatter', mode: 'lines',
+    name: 'Classical power',
+    line: { color: var_blue, width: 2 }
+  };
+  const crudPowerTrace = {
+    x: ns, y: crudPowers, type: 'scatter', mode: 'lines',
+    name: 'Crud-aware power',
+    line: { color: var_orange, width: 2 }
+  };
+  const xMin = ns[0];
+  const xMax = ns[ns.length - 1];
+  const tickVals = [30, 100, 300, 1000, 3000, 10000].filter(v => v >= xMin && v <= xMax);
+  const pvalLayout = {
+    title: { text: `Rejection & Power (μ = ${mu.toFixed(2)}) vs Sample Size`, font: { size: 14 } },
+    xaxis: {
+      title: 'Sample size N',
+      type: 'log',
+      range: [Math.log10(xMin), Math.log10(xMax)],
+      tickvals: tickVals,
+      ticktext: tickVals.map(v => v.toLocaleString())
+    },
+    yaxis: { title: 'Rate', range: [0, 1] },
+    shapes: [
+      { type: 'line', x0: xMin, x1: xMax, y0: 0.05, y1: 0.05,
+        line: { color: 'red', dash: 'dot', width: 1 } }
+    ],
+    annotations: [
+      { x: n, y: 0, text: 'N=' + n.toLocaleString(), showarrow: true,
+        ay: -30, font: { size: 10, color: '#666' } },
+      { x: ns[ns.length - 1], y: 0.08, text: '5%', showarrow: false,
+        font: { size: 10, color: 'red' } }
+    ],
+    margin: { t: 40, b: 50, l: 50, r: 20 },
+    legend: { x: 0.02, y: 0.98, font: { size: 10 } }
+  };
+
+  Plotly.react('plotPval', [classFPRTrace, crudFPRTrace, classPowerTrace, crudPowerTrace], pvalLayout, { responsive: true, displayModeBar: false });
+
+  // --- Plot 6: Decision-theoretic limit ---
+  const ratioMax = Math.max(3, ratio);
+  const ratioVals = [];
+  const errorVals = [];
+  for (let x = 0; x <= ratioMax; x += 0.05) {
+    ratioVals.push(x);
+    errorVals.push(normalCDF(-x / 2));
+  }
+  const decisionTrace = {
+    x: ratioVals, y: errorVals, type: 'scatter', mode: 'lines',
+    name: 'error*',
+    line: { color: '#0f172a', width: 2 }
+  };
+  const decisionMarker = {
+    x: [ratio], y: [normalCDF(-ratio / 2)], type: 'scatter', mode: 'markers',
+    name: 'Current',
+    marker: { color: var_orange, size: 7 }
+  };
+  const decisionLayout = {
+    title: { text: 'Best Possible Error vs |\u03BC|/\u03C3_crud', font: { size: 14 } },
+    xaxis: { title: '|\u03BC|/\u03C3_crud', range: [0, ratioMax] },
+    yaxis: { title: 'error*', range: [0, 0.5] },
+    margin: { t: 40, b: 50, l: 50, r: 20 },
+    legend: { x: 0.02, y: 0.98, font: { size: 10 } }
+  };
+  Plotly.react('plotDecision', [decisionTrace, decisionMarker], decisionLayout, { responsive: true, displayModeBar: false });
+}
+
+const var_blue = '#2563eb';
+const var_orange = '#ea580c';
+
+// Debounce
+function debouncedUpdate() {
+  clearTimeout(debounceTimer);
+  // Immediately update displayed values
+  const n = getN();
+  const p = getP();
+  const alpha = getAlpha();
+  const K = Math.min(10, Math.max(0, p - 2));
+  const sigmaK = computeSigmaK(computeEigenvalues(p, alpha), K);
+  valN.textContent = n.toLocaleString();
+  valP.textContent = p;
+  valAlpha.textContent = alpha.toFixed(2);
+  valMu.textContent = getMu().toFixed(2);
+  debounceTimer = setTimeout(update, 150);
+}
+
+sliderN.addEventListener('input', debouncedUpdate);
+sliderP.addEventListener('input', debouncedUpdate);
+sliderAlpha.addEventListener('input', () => {
+  document.querySelectorAll('#alphaPresets .preset').forEach(b => b.classList.remove('active'));
+  debouncedUpdate();
+});
+sliderMu.addEventListener('input', () => {
+  valMu.textContent = getMu().toFixed(2);
+  // mu affects analytic rates/curves; simulation remains background-only
+  // so skip debounce and update immediately
+  clearTimeout(debounceTimer);
+  update();
+});
+document.querySelectorAll('#alphaPresets .preset').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const alpha = parseFloat(btn.dataset.alpha);
+    sliderAlpha.value = alpha;
+    valAlpha.textContent = alpha.toFixed(2);
+    document.querySelectorAll('#alphaPresets .preset').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    update();
+  });
+});
+document.getElementById('resim').addEventListener('click', () => {
+  currentSeed = Math.floor(Math.random() * 2147483647);
+  update();
+});
+
+// Initial render
+update();
+
+// Render LaTeX
+document.addEventListener('DOMContentLoaded', () => {
+  renderMathInElement(document.body, {
+    delimiters: [
+      { left: '$$', right: '$$', display: true },
+      { left: '\\(', right: '\\)', display: false }
+    ],
+    throwOnError: false
+  });
+});
+</script>
+</body>
+</html>

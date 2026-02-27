@@ -24,6 +24,12 @@ Live demo: https://koerding.github.io/crud/
 
 Local demo: open `webapp/index.html` in a browser.
 
+## Links
+
+Repository: https://github.com/koerding/crud
+
+Paper (draft PDF): https://github.com/koerding/crud/blob/master/paper/crud.pdf
+
 ## Quickstart
 
 ```bash

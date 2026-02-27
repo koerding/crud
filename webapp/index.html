@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CRUD Factor Interactive Demo</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
@@ -43,6 +44,25 @@
     border-radius: 8px;
     padding: 16px 24px;
     margin-bottom: 20px;
+  }
+  .controls-title {
+    width: 100%;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .settings-summary {
+    width: 100%;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    color: var(--text);
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 12px;
   }
   .control-group { display: flex; flex-direction: column; gap: 4px; }
   .control-group label {
@@ -103,15 +123,6 @@
     transition: background 0.15s;
   }
   button#resim:hover { background: #1d4ed8; }
-  .sigma-display {
-    font-family: 'Courier New', monospace;
-    font-size: 0.95rem;
-    color: var(--orange);
-    padding: 4px 12px;
-    background: #fff7ed;
-    border: 1px solid #fed7aa;
-    border-radius: 4px;
-  }
   .plots {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -238,6 +249,7 @@
 <p class="subtitle">Traditional p-values can be tiny even when an association is entirely typical of the domain’s background dependence. Broad, power-law spectra spread shared variance across many dimensions, so generic adjustment doesn’t erase crud and larger N just measures it more precisely. The implication is a hard limit for association-only causal claims: when signals are comparable to the crud scale, no statistical threshold can reliably separate signal from background.</p>
 
 <div class="controls">
+  <div class="controls-title">Overall Settings</div>
   <div class="control-group">
     <label>Sample size (N)</label>
     <input type="range" id="sliderN" min="1.477" max="4" step="0.01" value="2.3">
@@ -265,6 +277,7 @@
     <span class="value" id="valMu">0.20</span>
   </div>
   <button id="resim">Resimulate</button>
+  <div class="settings-summary" id="settingsSummary">—</div>
 </div>
 
 <div class="plots">
@@ -454,6 +467,7 @@ function update() {
   const lambdas = computeEigenvalues(p, alpha);
   const sigmaK = computeSigmaK(lambdas, K);
   const sigmaKsq = sigmaK * sigmaK;
+  const nStar = Math.round(1 / sigmaKsq + 3);
   valN.textContent = n.toLocaleString();
   valP.textContent = p;
   valAlpha.textContent = alpha.toFixed(2);
@@ -517,9 +531,12 @@ function update() {
   elCrudPow.className = 'rate-cell ' + rateClass(1 - crudFNR, false);
 
   const ratio = Math.abs(zMu) / (sigmaK || 1e-9);
-  const errorStar = normalCDF(-ratio / 2);
+  const finiteFactor = Math.sqrt(1 + 1 / ((n - 3) * (sigmaKsq || 1e-9)));
+  const errorStarFinite = normalCDF(-ratio / (2 * finiteFactor));
+  const settingsSummary = `N=${n.toLocaleString()} | p=${p} | \u03B1=${alpha.toFixed(2)} | \u03C3_crud=${sigmaK.toFixed(3)} | \u03BC=${mu.toFixed(2)} | n*≈${nStar.toLocaleString()}`;
+  document.getElementById('settingsSummary').textContent = settingsSummary;
   document.getElementById('decisionNote').textContent =
-    `Best possible error (association-only): ${fmtPct(errorStar)} when |\u03BC|/\u03C3_crud = ${ratio.toFixed(2)}.`;
+    `Best possible error (association-only, finite n): ${fmtPct(errorStarFinite)} when |atanh(\u03BC)|/\u03C3_crud = ${ratio.toFixed(2)}.`;
 
   document.getElementById('sigDetail').textContent =
     classFPR > 0.20 ?
@@ -584,7 +601,6 @@ function update() {
 
   Plotly.react('plotHist', [crudBandTrace, histTrace, overlayTrace], histLayout, { responsive: true, displayModeBar: false });
 
-  const nStar = Math.round(1 / sigmaKsq + 3);
   const nStarEl = document.getElementById('nStarText');
   if (nStarEl) nStarEl.textContent = nStar.toLocaleString();
 
@@ -682,32 +698,47 @@ function update() {
 
   Plotly.react('plotPval', [classFPRTrace, crudFPRTrace, classPowerTrace, crudPowerTrace], pvalLayout, { responsive: true, displayModeBar: false });
 
-  // --- Plot 6: Decision-theoretic limit ---
+  // --- Plot 6: Decision-theoretic limit (curves by N) ---
   const ratioMax = Math.max(3, ratio);
   const ratioVals = [];
-  const errorVals = [];
-  for (let x = 0; x <= ratioMax; x += 0.05) {
-    ratioVals.push(x);
-    errorVals.push(normalCDF(-x / 2));
+  for (let x = 0; x <= ratioMax; x += 0.05) ratioVals.push(x);
+
+  const nCurves = [30, 100, 300, 1000, 10000];
+  const colors = ['#0f172a', '#2563eb', '#16a34a', '#f59e0b', '#dc2626'];
+  const decisionTraces = [];
+  for (let i = 0; i < nCurves.length; i++) {
+    const nn = nCurves[i];
+    const factor = Math.sqrt(1 + 1 / ((nn - 3) * (sigmaKsq || 1e-9)));
+    const errs = ratioVals.map(x => normalCDF(-x / (2 * factor)));
+    decisionTraces.push({
+      x: ratioVals, y: errs, type: 'scatter', mode: 'lines',
+      name: `n=${nn.toLocaleString()}`,
+      line: { color: colors[i], width: nn === n ? 3 : 2 }
+    });
   }
-  const decisionTrace = {
-    x: ratioVals, y: errorVals, type: 'scatter', mode: 'lines',
-    name: 'error*',
-    line: { color: '#0f172a', width: 2 }
-  };
-  const decisionMarker = {
-    x: [ratio], y: [normalCDF(-ratio / 2)], type: 'scatter', mode: 'markers',
+  // Asymptotic (n -> infinity)
+  decisionTraces.push({
+    x: ratioVals,
+    y: ratioVals.map(x => normalCDF(-x / 2)),
+    type: 'scatter',
+    mode: 'lines',
+    name: 'n→∞',
+    line: { color: '#64748b', width: 2, dash: 'dash' }
+  });
+
+  const currentMarker = {
+    x: [ratio], y: [errorStarFinite], type: 'scatter', mode: 'markers',
     name: 'Current',
     marker: { color: var_orange, size: 7 }
   };
   const decisionLayout = {
-    title: { text: 'Best Possible Error vs |\u03BC|/\u03C3_crud', font: { size: 14 } },
-    xaxis: { title: '|\u03BC|/\u03C3_crud', range: [0, ratioMax] },
+    title: { text: 'Best Possible Error vs |atanh(\u03BC)|/\u03C3_crud (curves by N)', font: { size: 14 } },
+    xaxis: { title: '|atanh(\u03BC)|/\u03C3_crud', range: [0, ratioMax] },
     yaxis: { title: 'error*', range: [0, 0.5] },
     margin: { t: 40, b: 50, l: 50, r: 20 },
     legend: { x: 0.02, y: 0.98, font: { size: 10 } }
   };
-  Plotly.react('plotDecision', [decisionTrace, decisionMarker], decisionLayout, { responsive: true, displayModeBar: false });
+  Plotly.react('plotDecision', [...decisionTraces, currentMarker], decisionLayout, { responsive: true, displayModeBar: false });
 }
 
 const var_blue = '#2563eb';
@@ -722,10 +753,13 @@ function debouncedUpdate() {
   const alpha = getAlpha();
   const K = Math.min(10, Math.max(0, p - 2));
   const sigmaK = computeSigmaK(computeEigenvalues(p, alpha), K);
+  const nStar = Math.round(1 / (sigmaK * sigmaK) + 3);
   valN.textContent = n.toLocaleString();
   valP.textContent = p;
   valAlpha.textContent = alpha.toFixed(2);
   valMu.textContent = getMu().toFixed(2);
+  document.getElementById('settingsSummary').textContent =
+    `N=${n.toLocaleString()} | p=${p} | \u03B1=${alpha.toFixed(2)} | \u03C3_crud=${sigmaK.toFixed(3)} | \u03BC=${getMu().toFixed(2)} | n*\u2248${nStar.toLocaleString()}`;
   debounceTimer = setTimeout(update, 150);
 }
 

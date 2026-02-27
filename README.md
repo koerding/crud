@@ -28,7 +28,7 @@ Local demo: open `webapp/index.html` in a browser.
 
 Repository: https://github.com/koerding/crud
 
-Paper (draft PDF): https://github.com/koerding/crud/blob/master/paper/crud.pdf
+Paper (draft PDF): https://raw.githubusercontent.com/koerding/crud/master/paper/crud.pdf
 
 ## Quickstart
 

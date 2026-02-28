@@ -8,7 +8,7 @@ Appendix~\ref{app:bridge-lemmas} (Theorem~\ref{thm:crud-scale}) shows that for a
 \[
 \sigma_K := \frac{\sqrt{\sum_{k>K} \lambda_k^2}}{\sum_{k>K} \lambda_k}.
 \]
-Intuitively, the numerator measures how unevenly the remaining variance is distributed across components (the more concentrated it is, the wider the residual correlations), while the denominator measures the total remaining variance (which sets the scale). The result requires that individual PCs spread their influence broadly across features rather than loading on just a few---a condition called ``eigenvector delocalization'' that we verify empirically using standard diagnostics (Appendix~\ref{app:assumption-audit}, Figures S1--S2). The spectral prediction tracks the empirical residual SD across values of $K$ in all nine datasets.
+Intuitively, the numerator measures how unevenly the remaining variance is distributed across components (the more concentrated it is, the wider the residual correlations), while the denominator measures the total remaining variance (which sets the scale). The result requires that individual PCs spread their influence broadly across features rather than loading on just a few---a condition called ``eigenvector delocalization'' that we verify empirically using standard diagnostics (Appendix~\ref{app:assumption-audit}, Figures S1--S2); violations would show up as unusually concentrated loadings. The spectral prediction tracks the empirical residual SD across values of $K$ in all nine datasets.
 
 In block-structured settings, $\sigma_K$ should be read as a global crud scale; local or block-specific crud scales may be larger.
 
@@ -21,6 +21,8 @@ Thus, even removing $K=10$ components can leave a substantial residual crud scal
 \subsection{Decision-theoretic limit}
 
 The crud scale $\sigma_K$ sets the width of the background correlation distribution. A natural follow-up question is: can we still reliably pick out truly causal pairs from this background? Standard significance testing asks whether an association differs from zero. The relevant question here is different: given that background correlations are not zero but instead drawn from a distribution of width $\sigma_K$, can any statistical rule reliably classify a pair as ``causally linked'' versus ``merely correlated by background dependence''?
+
+The formal results can be read in a frequentist way by treating the spectrum and eigenvectors as fixed but unknown properties of the data-generating distribution; the distributional assumptions summarize empirical regularities across domains rather than introduce a Bayesian prior.
 
 Appendix~\ref{app:bridge-lemmas} (Theorem~\ref{thm:assoc-only}) formalizes this as a signal-detection problem. Consider a random pair $(i,j)$: most pairs have no direct causal edge, and a small fraction have a direct edge that induces a mean shift $\mu$ in the adjusted association statistic $T_{ij}$ (e.g., the adjusted sample correlation). Under the simplest form,
 \[

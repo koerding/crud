@@ -22,6 +22,7 @@ with two-sided p-value $p_{\mathrm{crud}} = 2\,\Ph(-z_{\mathrm{crud}})$.
 The classical correlation test uses $z_{\mathrm{classical}}=|r|\sqrt{n-1}$, which is the special case $\sigma_{\mathrm{crud}}=0$: it tests against the null of zero population correlation, ignoring that a nonzero correlation may be entirely typical of the domain background.
 
 When $n$ is large, the sampling variance $1/(n-1)$ shrinks but the crud variance does not.
+These statements are for fixed adjustment ($K$ fixed), which is the realistic regime when confounder adjustment is bounded by domain knowledge and estimation stability; moreover, indiscriminate adjustment can introduce collider bias, so ``more $K$'' is not always safer.
 A study with $n=200$ and $r=0.15$ yields $p<0.05$ classically, yet $p_{\mathrm{crud}}\approx 0.37$ when $\sigma_{\mathrm{crud}}=0.15$: the observed association is entirely typical of the domain background.
 In this regime, the classical test is detecting crud, not signal.
 
@@ -32,6 +33,7 @@ When $n$ is small (specifically $n \ll 1/\sigma_{\mathrm{crud}}^2$), sampling no
 Because $\sigma_{\mathrm{crud}} \approx 0.02$--$0.14$ across the domains in Table~\ref{tab:crud-scale} (at $K=10$), the crossover occurs at roughly $n \approx 50$--$2{,}500$.
 Beyond this point, classical $p$-values continue to shrink---explaining why massive studies routinely report ``significant'' but tiny effects---while the crud-aware $p$-value plateaus.
 For the purpose of distinguishing small associations from background dependence, there are sharply diminishing returns to collecting more than a few thousand observations per study.
+Although larger $n$ can in principle support larger $K$, in high-dimensional data $K$ grows slowly relative to $p$ and estimation noise in adjustment accumulates, so $\sigma_K$ shrinks too slowly to close the gap.
 
 \begin{center}
 \fbox{\parbox{0.92\textwidth}{

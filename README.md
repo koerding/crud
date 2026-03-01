@@ -20,9 +20,11 @@ data/           Downloaded datasets and caches (gitignored)
 
 ## Webapp
 
-Live demo: https://koerding.github.io/crud/
+Live interactive demo: https://koerding.github.io/crud/
 
-Local demo: open `webapp/index.html` in a browser.
+Crud-aware test calculator: https://koerding.github.io/crud/test.html
+
+Local: open `webapp/index.html` or `webapp/test.html` in a browser.
 
 ## Links
 

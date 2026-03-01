@@ -304,7 +304,7 @@
           <td id="crudFPR" class="rate-cell">—</td>
         </tr>
         <tr>
-          <td class="row-label">Miss rate for target effect (&mu;)</td>
+          <td class="row-label">False negative rate (miss &mu;)</td>
           <td id="classFNR" class="rate-cell">—</td>
           <td id="crudFNR" class="rate-cell">—</td>
         </tr>
@@ -346,7 +346,7 @@
     <span class="formula">$$H_0:\ z_{\text{true}} \sim \mathcal{N}(0,\sigma_{\text{crud}}^2), \quad z=\operatorname{atanh}(r)$$</span>
     <p>That is, the true association for a random pair is drawn from the domain’s background distribution. With large data you can estimate this empirically; here we show the parametric version on the Fisher \(z\) scale:</p>
     <span class="formula">$$z_{\text{crud}} = \frac{|\!\operatorname{atanh}(r)|}{\sqrt{\sigma_{\text{crud}}^2 + 1/(n-3)}}$$</span>
-    <p>The resulting crud-aware p-value is a <em>calibration score</em> against background dependence, not an iid Type-I-error guarantee.</p>
+    <p>The resulting crud-aware p-value is a two-sided test against the domain's background distribution. It controls Type-I error under the null that the target pair's true association is drawn from the crud distribution.</p>
   </div>
 
   <div class="section">
@@ -634,9 +634,9 @@ function update() {
     marker: { size: 4 }
   };
   const specLayout = {
-    title: { text: `Eigenvalue Spectrum (\u03BB_k \u221D k^\u2212${alpha.toFixed(2)})`, font: { size: 14 } },
+    title: { text: `Eigenvalue Spectrum (\u03BB_k \u221D k^\u2212${alpha.toFixed(2)}, \u03C3_crud=${sigmaK.toFixed(3)})`, font: { size: 14 } },
     xaxis: { title: 'PC index k', type: 'log' },
-    yaxis: { title: '\u03BB_k', type: 'log' },
+    yaxis: { title: '\u03BB_k', type: 'log', range: [-3, 0.2] },
     margin: { t: 40, b: 50, l: 60, r: 20 }
   };
   Plotly.react('plotSpec', [specTrace], specLayout, { responsive: true, displayModeBar: false });
@@ -748,9 +748,17 @@ function update() {
     marker: { color: var_orange, size: 7 }
   };
   const decisionLayout = {
-    title: { text: 'Best Possible Error vs |atanh(\u03BC)|/\u03C3_crud (curves by N)', font: { size: 14 } },
-    xaxis: { title: '|atanh(\u03BC)|/\u03C3_crud', range: [0, ratioMax] },
-    yaxis: { title: 'error*', range: [0, 0.5] },
+    title: { text: 'Hard Limit: No Test Can Do Better', font: { size: 14 } },
+    xaxis: { title: 'Signal-to-crud ratio  |\u03BC| / \u03C3_crud', range: [0, ratioMax] },
+    yaxis: { title: 'Minimum achievable error', range: [0, 0.5] },
+    annotations: [{
+      x: Math.min(ratio, ratioMax), y: errorStarFinite,
+      text: ratio < 1 ? 'Your \u03BC is inside the crud' :
+            ratio < 2 ? 'Marginal — hard to distinguish' :
+            'Signal exceeds crud',
+      showarrow: true, ax: 40, ay: -25,
+      font: { size: 10, color: var_orange }
+    }],
     margin: { t: 40, b: 50, l: 50, r: 20 },
     legend: { x: 0.02, y: 0.98, font: { size: 10 } }
   };

@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crud-Aware Test Calculator</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<style>
+  :root {
+    --blue: #2563eb;
+    --orange: #ea580c;
+    --green: #16a34a;
+    --red: #dc2626;
+    --gray: #64748b;
+    --bg: #fafafa;
+    --card: #ffffff;
+    --text: #1e293b;
+    --muted: #64748b;
+    --border: #e2e8f0;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+  h1 { font-size: 1.6rem; margin-bottom: 4px; }
+  h1 span { color: var(--orange); }
+  .subtitle { color: var(--muted); font-size: 0.95rem; margin-bottom: 24px; font-style: italic; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+  }
+
+  /* Input fields */
+  .inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+  .input-group { display: flex; flex-direction: column; gap: 4px; }
+  .input-group label {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .input-group input[type=number] {
+    font-family: 'Courier New', monospace;
+    font-size: 1.1rem;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .input-group input[type=number]:focus {
+    border-color: var(--blue);
+  }
+  .input-group .hint {
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  /* Domain presets */
+  .presets-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .presets-label {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+  .preset {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.72rem;
+    padding: 2px 8px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--bg);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .preset:hover { border-color: var(--orange); color: var(--orange); }
+  .preset.active { border-color: var(--orange); background: #fff7ed; color: var(--orange); }
+  .preset span { font-family: 'Courier New', monospace; font-weight: bold; }
+
+  /* Results */
+  .results {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .result-box {
+    padding: 16px;
+    border-radius: 8px;
+    text-align: center;
+  }
+  .result-box.classical {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+  }
+  .result-box.crud {
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+  }
+  .result-box .result-label {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 8px;
+  }
+  .result-box.classical .result-label { color: var(--blue); }
+  .result-box.crud .result-label { color: var(--orange); }
+  .result-box .p-value {
+    font-family: 'Courier New', monospace;
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 4px;
+  }
+  .result-box .verdict {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+  .result-box .z-stat {
+    font-family: 'Courier New', monospace;
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* Interpretation */
+  .interpretation {
+    font-size: 0.95rem;
+    color: #334155;
+    line-height: 1.7;
+  }
+  .interpretation strong { color: var(--text); }
+
+  /* Formula display */
+  .formula-section {
+    margin-top: 4px;
+    padding: 16px 20px;
+    background: #f8fafc;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+  }
+  .formula-section h3 {
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+  }
+  .formula {
+    display: block;
+    text-align: center;
+    margin: 12px 0;
+  }
+  .formula-section p {
+    font-size: 0.88rem;
+    color: #475569;
+    margin-bottom: 6px;
+  }
+
+  .sig { color: var(--green); }
+  .nonsig { color: var(--muted); }
+
+  .link-bar {
+    margin-top: 24px;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  .link-bar a { color: var(--blue); }
+
+  @media (max-width: 500px) {
+    .inputs { grid-template-columns: 1fr; }
+    .results { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Crud-Aware <span>Test</span></h1>
+<p class="subtitle">Compare your observed correlation against the domain's background dependence, not against zero</p>
+
+<div class="card">
+  <div class="inputs">
+    <div class="input-group">
+      <label>Observed r</label>
+      <input type="number" id="inputR" value="0.15" step="0.01" min="-1" max="1">
+      <span class="hint">Sample correlation</span>
+    </div>
+    <div class="input-group">
+      <label>Sample size (n)</label>
+      <input type="number" id="inputN" value="200" step="1" min="10" max="1000000">
+      <span class="hint">Number of observations</span>
+    </div>
+    <div class="input-group">
+      <label>&sigma;<sub>crud</sub></label>
+      <input type="number" id="inputSigma" value="0.15" step="0.01" min="0.01" max="0.50">
+      <span class="hint">Crud scale (Fisher z)</span>
+    </div>
+  </div>
+  <div class="presets-row">
+    <span class="presets-label">Typical values:</span>
+    <button class="preset" data-sigma="0.09" title="Kay, Haxby, Stringer fMRI">Neuro <span>0.09</span></button>
+    <button class="preset" data-sigma="0.15" title="HEXACO personality">Psych <span>0.15</span></button>
+    <button class="preset" data-sigma="0.17" title="Precinct-level voting">Social <span>0.17</span></button>
+    <button class="preset" data-sigma="0.11" title="NHANES health survey">Med <span>0.11</span></button>
+    <button class="preset" data-sigma="0.22" title="RNA-Seq, GTEx gene expression">Bio <span>0.22</span></button>
+  </div>
+</div>
+
+<div class="results">
+  <div class="result-box classical">
+    <div class="result-label">Classical test</div>
+    <div class="result-label" style="font-size:0.7rem; text-transform:none; font-weight:normal; margin-bottom:4px;">\(H_0\!: \rho = 0\)</div>
+    <div class="p-value" id="classicalP">—</div>
+    <div class="verdict" id="classicalVerdict"></div>
+    <div class="z-stat" id="classicalZ"></div>
+  </div>
+  <div class="result-box crud">
+    <div class="result-label">Crud-aware test</div>
+    <div class="result-label" style="font-size:0.7rem; text-transform:none; font-weight:normal; margin-bottom:4px;">\(H_0\!: z_{\text{true}} \sim \mathcal{N}(0, \sigma_{\text{crud}}^2)\)</div>
+    <div class="p-value" id="crudP">—</div>
+    <div class="verdict" id="crudVerdict"></div>
+    <div class="z-stat" id="crudZ"></div>
+  </div>
+</div>
+
+<div class="card interpretation" id="interpretation"></div>
+
+<div class="card formula-section">
+  <h3>How it works</h3>
+  <p>Both tests use the Fisher transformation \(z = \operatorname{atanh}(r)\), which has sampling variance \(\approx 1/(n-3)\).</p>
+
+  <p><strong>Classical test</strong> asks: is \(r\) different from zero?</p>
+  <span class="formula">$$z_{\text{classical}} = \frac{|\!\operatorname{atanh}(r)|}{\sqrt{1/(n-3)}}$$</span>
+
+  <p><strong>Crud-aware test</strong> asks: is \(r\) unusual relative to the domain's background?</p>
+  <span class="formula">$$z_{\text{crud}} = \frac{|\!\operatorname{atanh}(r)|}{\sqrt{\sigma_{\text{crud}}^2 + 1/(n-3)}}$$</span>
+
+  <p>The denominator of the crud-aware test includes both sampling noise <em>and</em> background variance. A correlation must exceed the crud scale to be declared significant, not just exceed zero.</p>
+
+  <p>The crossover sample size where sampling variance equals crud variance is:</p>
+  <span class="formula">$$n^* = \frac{1}{\sigma_{\text{crud}}^2} + 3$$</span>
+  <p>Below \(n^*\), both tests behave similarly. Above \(n^*\), the classical test starts flagging crud as "significant."</p>
+</div>
+
+<div class="link-bar">
+  <a href="index.html">Interactive demo</a> &middot;
+  <a href="https://github.com/koerding/crud" target="_blank" rel="noopener">Repository</a> &middot;
+  <a href="https://raw.githubusercontent.com/koerding/crud/master/paper/crud.pdf" target="_blank" rel="noopener">Paper (PDF)</a>
+</div>
+
+<script>
+// Normal CDF - Abramowitz & Stegun
+function normalCDF(x) {
+  const a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741;
+  const a4 = -1.453152027, a5 = 1.061405429, p = 0.3275911;
+  const sign = x < 0 ? -1 : 1;
+  x = Math.abs(x) / Math.SQRT2;
+  const t = 1 / (1 + p * x);
+  const y = 1 - ((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+  return 0.5 * (1 + sign * y);
+}
+
+function pvalueFromZ(z) {
+  return 2 * (1 - normalCDF(Math.abs(z)));
+}
+
+function fisherZ(r) {
+  const c = Math.max(-0.999999, Math.min(0.999999, r));
+  return 0.5 * Math.log((1 + c) / (1 - c));
+}
+
+function formatP(p) {
+  if (p < 0.0001) return p.toExponential(2);
+  if (p < 0.01) return p.toFixed(4);
+  return p.toFixed(3);
+}
+
+const inputR = document.getElementById('inputR');
+const inputN = document.getElementById('inputN');
+const inputSigma = document.getElementById('inputSigma');
+
+function update() {
+  const r = parseFloat(inputR.value);
+  const n = parseInt(inputN.value);
+  const sigma = parseFloat(inputSigma.value);
+
+  if (isNaN(r) || isNaN(n) || isNaN(sigma) || n < 4) return;
+
+  const z = fisherZ(r);
+  const absZ = Math.abs(z);
+  const samplingVar = 1 / (n - 3);
+  const samplingSD = Math.sqrt(samplingVar);
+  const totalSD = Math.sqrt(sigma * sigma + samplingVar);
+  const nStar = Math.round(1 / (sigma * sigma) + 3);
+
+  // Classical: H0 is rho=0, so z_true=0, z_obs ~ N(0, 1/(n-3))
+  const zClassical = absZ / samplingSD;
+  const pClassical = pvalueFromZ(zClassical);
+
+  // Crud-aware: H0 is z_true ~ N(0, sigma^2), z_obs ~ N(z_true, 1/(n-3))
+  // marginal: z_obs ~ N(0, sigma^2 + 1/(n-3))
+  const zCrud = absZ / totalSD;
+  const pCrud = pvalueFromZ(zCrud);
+
+  // Display
+  const elCP = document.getElementById('classicalP');
+  const elCrudP = document.getElementById('crudP');
+  elCP.textContent = 'p = ' + formatP(pClassical);
+  elCrudP.textContent = 'p = ' + formatP(pCrud);
+
+  const sigAt05 = (p) => p < 0.05;
+  document.getElementById('classicalVerdict').innerHTML =
+    sigAt05(pClassical)
+      ? '<span class="sig">Significant at 0.05</span>'
+      : '<span class="nonsig">Not significant</span>';
+  document.getElementById('crudVerdict').innerHTML =
+    sigAt05(pCrud)
+      ? '<span class="sig">Significant at 0.05</span>'
+      : '<span class="nonsig">Not significant</span>';
+
+  elCP.style.color = sigAt05(pClassical) ? 'var(--blue)' : 'var(--muted)';
+  elCrudP.style.color = sigAt05(pCrud) ? 'var(--orange)' : 'var(--muted)';
+
+  document.getElementById('classicalZ').textContent = 'z = ' + zClassical.toFixed(2);
+  document.getElementById('crudZ').textContent = 'z = ' + zCrud.toFixed(2);
+
+  // Interpretation
+  const interp = document.getElementById('interpretation');
+  const absR = Math.abs(r);
+  const rCritCrud = Math.tanh(1.96 * totalSD);
+
+  if (sigAt05(pClassical) && !sigAt05(pCrud)) {
+    interp.innerHTML =
+      `<strong>Classical says significant, crud-aware says no.</strong> ` +
+      `Your correlation of <strong>r = ${r}</strong> exceeds what sampling noise alone would produce, ` +
+      `but it is within the range expected from background dependence ` +
+      `(\u03C3<sub>crud</sub> = ${sigma}). ` +
+      `With n = ${n.toLocaleString()} (above n* \u2248 ${nStar.toLocaleString()}), the classical test is detecting crud, not signal. ` +
+      `You would need |r| > ${rCritCrud.toFixed(3)} to be crud-aware significant.`;
+  } else if (sigAt05(pClassical) && sigAt05(pCrud)) {
+    interp.innerHTML =
+      `<strong>Both tests agree: significant.</strong> ` +
+      `Your correlation of <strong>r = ${r}</strong> exceeds both zero and the background crud level. ` +
+      `This association is unusual even relative to the domain's background dependence. ` +
+      `The crud-aware threshold is |r| > ${rCritCrud.toFixed(3)}.`;
+  } else if (!sigAt05(pClassical) && !sigAt05(pCrud)) {
+    interp.innerHTML =
+      `<strong>Neither test is significant.</strong> ` +
+      `Your correlation of <strong>r = ${r}</strong> with n = ${n.toLocaleString()} ` +
+      `cannot be distinguished from zero, let alone from background dependence. ` +
+      `More data or a stronger effect is needed.`;
+  } else {
+    interp.innerHTML =
+      `<strong>Crud-aware significant but not classical.</strong> ` +
+      `This is unusual and typically only happens at very small n. ` +
+      `The crud-aware denominator can be smaller than the classical one when \u03C3<sub>crud</sub> is very small.`;
+  }
+}
+
+// Wire up inputs
+inputR.addEventListener('input', update);
+inputN.addEventListener('input', update);
+inputSigma.addEventListener('input', update);
+
+// Presets
+document.querySelectorAll('.preset').forEach(btn => {
+  btn.addEventListener('click', () => {
+    inputSigma.value = btn.dataset.sigma;
+    document.querySelectorAll('.preset').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    update();
+  });
+});
+inputSigma.addEventListener('input', () => {
+  document.querySelectorAll('.preset').forEach(b => b.classList.remove('active'));
+});
+
+// Initial
+update();
+
+// Render LaTeX
+document.addEventListener('DOMContentLoaded', () => {
+  renderMathInElement(document.body, {
+    delimiters: [
+      { left: '$$', right: '$$', display: true },
+      { left: '\\(', right: '\\)', display: false }
+    ],
+    throwOnError: false
+  });
+});
+</script>
+</body>
+</html>

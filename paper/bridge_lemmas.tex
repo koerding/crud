@@ -161,11 +161,11 @@ random-pair correlations are smaller.
 \begin{theorem}[Crud scale under top-$K$ PC removal]\label{thm:crud-scale}
 Assume Assumption~\ref{ass:haar}. Fix $K\in\{0,\ldots,p-1\}$ and define tail sums
 \begin{equation}
-S_1(K) := \sum_{k>K}\lambda_k,\qquad S_2(K) := \sum_{k>K}\lambda_k^2.
+T_1(K) := \sum_{k>K}\lambda_k,\qquad T_2(K) := \sum_{k>K}\lambda_k^2.
 \end{equation}
 Then for a uniformly random pair $(i,j)$ with $i\neq j$,
 \begin{equation}
-\SD\!\left(\rho^{(K)}_{ij}\right) = \frac{\sqrt{S_2(K)}}{S_1(K)}\cdot \bigl(1+o_p(1)\bigr),
+\SD\!\left(\rho^{(K)}_{ij}\right) = \frac{\sqrt{T_2(K)}}{T_1(K)}\cdot \bigl(1+o_p(1)\bigr),
 \end{equation}
 as $p\to\infty$ (with $K$ allowed to grow with $p$, provided $K<p$ and the tail is nontrivial).
 Equivalently, the typical residual correlation magnitude across random feature pairs is controlled by
@@ -198,7 +198,7 @@ so
 \end{equation}
 and therefore
 \begin{equation}
-\SD(\Sigma^{(K)}_{ij})=\frac{1}{p}\sqrt{S_2(K)}\cdot \bigl(1+o(1)\bigr).
+\SD(\Sigma^{(K)}_{ij})=\frac{1}{p}\sqrt{T_2(K)}\cdot \bigl(1+o(1)\bigr).
 \end{equation}
 
 Next, consider the diagonal:
@@ -207,33 +207,33 @@ Next, consider the diagonal:
 \end{equation}
 Taking expectations gives
 \begin{equation}
-\E[\Sigma^{(K)}_{ii}]=\sum_{k>K}\lambda_k\E[v_{ik}^2]=\frac{1}{p}S_1(K).
+\E[\Sigma^{(K)}_{ii}]=\sum_{k>K}\lambda_k\E[v_{ik}^2]=\frac{1}{p}T_1(K).
 \end{equation}
 Under Assumption~\ref{ass:haar}, $\Sigma^{(K)}_{ii}$ concentrates around its mean with relative
 fluctuations $o_p(1)$ (a standard consequence of bounded fourth moments and orthogonality).
 Hence
 \begin{equation}
-\sqrt{\Sigma^{(K)}_{ii}\Sigma^{(K)}_{jj}}=\frac{1}{p}S_1(K)\cdot \bigl(1+o_p(1)\bigr).
+\sqrt{\Sigma^{(K)}_{ii}\Sigma^{(K)}_{jj}}=\frac{1}{p}T_1(K)\cdot \bigl(1+o_p(1)\bigr).
 \end{equation}
 
 Finally, for $i\neq j$,
 \begin{equation}
 \rho^{(K)}_{ij}
 =\frac{\Sigma^{(K)}_{ij}}{\sqrt{\Sigma^{(K)}_{ii}\Sigma^{(K)}_{jj}}}
-=\frac{\Sigma^{(K)}_{ij}}{\frac{1}{p}S_1(K)}\cdot \bigl(1+o_p(1)\bigr).
+=\frac{\Sigma^{(K)}_{ij}}{\frac{1}{p}T_1(K)}\cdot \bigl(1+o_p(1)\bigr).
 \end{equation}
 Taking standard deviations and substituting the expression for $\SD(\Sigma^{(K)}_{ij})$ yields
 \begin{equation}
 \SD(\rho^{(K)}_{ij})
-=\frac{\frac{1}{p}\sqrt{S_2(K)}}{\frac{1}{p}S_1(K)}\cdot \bigl(1+o_p(1)\bigr)
-=\frac{\sqrt{S_2(K)}}{S_1(K)}\cdot \bigl(1+o_p(1)\bigr).
+=\frac{\frac{1}{p}\sqrt{T_2(K)}}{\frac{1}{p}T_1(K)}\cdot \bigl(1+o_p(1)\bigr)
+=\frac{\sqrt{T_2(K)}}{T_1(K)}\cdot \bigl(1+o_p(1)\bigr).
 \end{equation}
 \end{proof}
 
 \begin{corollary}[Power-law eigenvalues imply slow decay in $K$]\label{cor:powerlaw}
 Assume $\lambda_k = c k^{-\alpha}$ for $k=1,\ldots,p$ with $c>0$ and $\alpha>1/2$,
 and assume the conditions of Theorem~\ref{thm:crud-scale}. Then for $1\ll K\ll p$,
-the crud scale $\sigma_K=\sqrt{S_2(K)}/S_1(K)$ satisfies:
+the crud scale $\sigma_K=\sqrt{T_2(K)}/T_1(K)$ satisfies:
 \begin{itemize}
 \item If $\alpha=1$, then $\sigma_K \asymp \dfrac{1}{\sqrt{K}\,\log(p/K)}$.
 \item If $\alpha>1$, then $\sigma_K \asymp \dfrac{1}{\sqrt{K}}$.
@@ -244,22 +244,22 @@ only on $(c,\alpha)$.
 \end{corollary}
 
 \begin{proof}
-By Theorem~\ref{thm:crud-scale}, it suffices to compute asymptotics of $S_1(K)$ and $S_2(K)$.
+By Theorem~\ref{thm:crud-scale}, it suffices to compute asymptotics of $T_1(K)$ and $T_2(K)$.
 Approximate sums by integrals.
 
 If $\alpha=1$:
-$S_1(K)=c\sum_{k=K+1}^p k^{-1}\asymp c\log(p/K)$ and
-$S_2(K)=c^2\sum_{k=K+1}^\infty k^{-2}\asymp c^2/K$.
+$T_1(K)=c\sum_{k=K+1}^p k^{-1}\asymp c\log(p/K)$ and
+$T_2(K)=c^2\sum_{k=K+1}^\infty k^{-2}\asymp c^2/K$.
 Thus $\sigma_K\asymp (c/\sqrt{K})/(c\log(p/K))$.
 
 If $\alpha>1$:
-$S_1(K)\asymp c\int_K^\infty x^{-\alpha}dx \asymp c K^{1-\alpha}$ and
-$S_2(K)\asymp c^2\int_K^\infty x^{-2\alpha}dx \asymp c^2 K^{1-2\alpha}$,
+$T_1(K)\asymp c\int_K^\infty x^{-\alpha}dx \asymp c K^{1-\alpha}$ and
+$T_2(K)\asymp c^2\int_K^\infty x^{-2\alpha}dx \asymp c^2 K^{1-2\alpha}$,
 so $\sigma_K\asymp K^{-1/2}$.
 
 If $1/2<\alpha<1$:
-$S_1(K)\asymp c\int_K^p x^{-\alpha}dx \asymp c\,(p^{1-\alpha}-K^{1-\alpha})\asymp c\,p^{1-\alpha}$
-and $S_2(K)\asymp c^2 K^{1-2\alpha}$, giving
+$T_1(K)\asymp c\int_K^p x^{-\alpha}dx \asymp c\,(p^{1-\alpha}-K^{1-\alpha})\asymp c\,p^{1-\alpha}$
+and $T_2(K)\asymp c^2 K^{1-2\alpha}$, giving
 $\sigma_K\asymp (c K^{(1-2\alpha)/2})/(c p^{1-\alpha})
 =\frac{1}{\sqrt K}\left(\frac{K}{p}\right)^{1-\alpha}$.
 \end{proof}

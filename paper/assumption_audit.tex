@@ -99,7 +99,7 @@ eigenvectors are not perfectly delocalized.
 
 The central prediction of Theorem~\ref{thm:crud-scale} is that the standard deviation
 of off-diagonal residual correlations after removing $K$ PCs is approximately
-$\sigma_K = \sqrt{S_2(K)}/S_1(K)$.
+$\sigma_K = \sqrt{T_2(K)}/T_1(K)$.
 We compare this spectral prediction to the empirically measured SD of residual
 correlations on a random subset of 500 features.
 
@@ -136,7 +136,7 @@ broad spectra produce slowly decaying background correlations.
 \subsection{Test 4: Diagonal concentration of residual covariance}
 
 The proof of Theorem~\ref{thm:crud-scale} requires that the diagonal entries
-$\Sigma^{(K)}_{ii}$ concentrate around their mean $S_1(K)/p$.
+$\Sigma^{(K)}_{ii}$ concentrate around their mean $T_1(K)/p$.
 We measure this via the coefficient of variation (CV) of the residual variance
 $\Var_n(X_i^{(K)})$ across features $i$.
 

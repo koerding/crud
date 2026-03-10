@@ -14,6 +14,7 @@ cannot be attributed to marginal effects alone.
 """
 
 import gc
+import warnings
 from typing import Callable, Dict, Tuple
 
 import numpy as np
@@ -115,6 +116,10 @@ def run_null_model_comparisons(dataset_loaders: Dict[str, Callable]) -> dict:
     """
     NULL_TOPK = 300   # max number of PCs to extract per dataset
     N_PERM = 3        # number of column-permutation replicates to average
+    # NOTE: Capping n and p below keeps null-model PCA tractable but may
+    # distort the Marchenko-Pastur baseline for datasets where the original
+    # dimensions substantially exceed these caps (the aspect ratio p/n changes,
+    # shifting the MP edge and bulk shape).
     MAX_N_NULL = 5000  # cap rows for computational tractability
     MAX_P_NULL = 2000  # cap columns for computational tractability
 
@@ -126,6 +131,14 @@ def run_null_model_comparisons(dataset_loaders: Dict[str, Callable]) -> dict:
 
         # --- Subsample rows and columns if the matrix is too large ---
         rng = np.random.default_rng(SEED)
+        if X.shape[0] > MAX_N_NULL or X.shape[1] > MAX_P_NULL:
+            warnings.warn(
+                f"[{name}] Capping matrix from ({X.shape[0]}, {X.shape[1]}) "
+                f"to ({min(X.shape[0], MAX_N_NULL)}, {min(X.shape[1], MAX_P_NULL)}); "
+                f"the Marchenko-Pastur null may be distorted because the "
+                f"aspect ratio p/n changes.",
+                stacklevel=2,
+            )
         if X.shape[0] > MAX_N_NULL:
             X = X[rng.choice(X.shape[0], size=MAX_N_NULL, replace=False)]
         if X.shape[1] > MAX_P_NULL:

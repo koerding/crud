@@ -11,7 +11,7 @@ causal inference can achieve.
 Key exports
 -----------
 crud_test : function
-    Permutation-based empirical calibration test.  Given a dataset and a set
+    Permutation-based empirical null test.  Given a dataset and a set
     of variable pairs, it checks whether observed partial correlations (after
     removing K principal components) are distinguishable from the background
     crud distribution predicted by the eigenvalue spectrum.

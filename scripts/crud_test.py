@@ -1,4 +1,4 @@
-"""Crud-aware calibration test — thin wrapper around code.crud_test.
+"""Crud-aware test — thin wrapper around code.crud_test.
 
 This top-level convenience module re-exports everything from the inner
 ``code.crud_test`` package so that ``python crud_test.py`` works from

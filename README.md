@@ -1,4 +1,4 @@
-# Is correlation meaningfully correlated with causation? Crud, 1/f spectra, and a calibration standard for small-effect observational claims
+# Is correlation meaningfully correlated with causation? Crud, 1/f spectra, and an empirical null for small-effect observational claims
 
 Code and paper for studying background correlations ("crud") in large observational datasets across biomedicine, neuroscience, psychology, genomics, politics, and vision.
 

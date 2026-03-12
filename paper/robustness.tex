@@ -293,14 +293,14 @@ not of the particular adjustment method.
 \subsection{Additional worked examples}
 \label{app:additional-examples}
 
-\paragraph{NHANES biomarkers.} Hemoglobin and hematocrit are known to be near-deterministically related (hematocrit $\approx 3\times$ hemoglobin by definition). In the NHANES dataset ($n = 29{,}902$), their correlation is $r = 0.91$. Applying the crud-aware $z$-test with $\sigma_{\mathrm{crud}} = 0.093$ (NHANES at $K=10$) gives $z_{\mathrm{crud}} = 9.8$, $p_{\mathrm{crud}} < 10^{-20}$. Similarly, ALT and AST (both liver transaminases reflecting hepatocyte damage) correlate at $r = 0.83$, giving $z_{\mathrm{crud}} = 8.9$. Both associations survive the crud-aware calibration by a wide margin, as expected for pairs with known mechanistic relationships.
+\paragraph{NHANES biomarkers.} Hemoglobin and hematocrit are known to be near-deterministically related (hematocrit $\approx 3\times$ hemoglobin by definition). In the NHANES dataset ($n = 29{,}902$), their correlation is $r = 0.91$. Applying the crud-aware $z$-test with $\sigma_{\mathrm{crud}} = 0.093$ (NHANES at $K=10$) gives $z_{\mathrm{crud}} = 9.8$, $p_{\mathrm{crud}} < 10^{-20}$. Similarly, ALT and AST (both liver transaminases reflecting hepatocyte damage) correlate at $r = 0.83$, giving $z_{\mathrm{crud}} = 8.9$. Both associations survive the the crud-aware test by a wide margin, as expected for pairs with known mechanistic relationships.
 
 \paragraph{GTEx RNA-seq.} Most cis-eQTLs reported in the GTEx v8 atlas have small effect sizes, with only about 22\% showing $>$2-fold effects \citep{gtex2020}. Using the GTEx v8 per-sample TPM data for skeletal muscle (top 10,000 genes by variance across 803 samples), the crud distribution at $K=10$ has a background SD of 0.10. A typical small cis-eQTL effect of $r=0.10$ sits at only the 71st crud percentile---squarely within the bulk of background gene--gene correlations. Even $r=0.20$ reaches only the 95th percentile. Only effects with $r>0.30$ (the 99th percentile, $3\times$ the background SD) are clearly distinctive. Since most reported cis-eQTLs have small effect sizes, much of the GTEx catalog may not be distinguishable from background transcriptomic dependence using association magnitude alone.
 
-\subsection{Positive control: known-strong pairs survive crud-aware calibration}
+\subsection{Positive control: known-strong pairs clear the empirical null}
 \label{app:positive-control}
 
-The crud-aware calibration framework (Section~\ref{app:crud-aware-pvalues}) is designed to
+The empirical null framework (Section~\ref{app:crud-aware-pvalues}) is designed to
 flag associations that stand out from the background. A natural concern is whether genuinely
 strong associations---pairs with known biological or psychometric relationships---do in fact
 survive this calibration. If the crud-aware null swallowed real signal, it would be too
@@ -359,7 +359,7 @@ After 20 PCs, enrichment is similar. The median within-facet $|r|$ drops from 0.
 0.04--0.05 after adjustment (comparable to the background SD of 0.04--0.05), yet the
 enrichment persists because within-facet correlations are systematically larger than
 typical random-pair correlations at the same adjustment level.
-Psychometrically designed pairs survive crud-aware calibration at every adjustment level.
+Psychometrically designed pairs clear the empirical null at every adjustment level.
 
 In NHANES, the enrichment is even stronger: 69\% of biomarker-group pairs are in the
 top 5\% at $K{=}0$, rising to 70\% at $K{=}20$ (where 54\% are in the top 1\%). This
@@ -368,8 +368,8 @@ hematocrit are physiologically coupled, systolic and diastolic blood pressure ar
 mechanically linked).
 Biologically grounded pairs are clearly distinctive against the domain background.
 
-The upshot is that the crud-aware calibration framework separates signal from noise
-in the right direction: genuinely strong associations survive calibration and are clearly
+The upshot is that the empirical null framework separates signal from noise
+in the right direction: genuinely strong associations clear the empirical null and are clearly
 distinguished from the background, even after generic PC adjustment.
 At the same time, the bulk of random-pair associations remain near the crud scale,
 reinforcing the main text's conclusion that most observed associations in these domains

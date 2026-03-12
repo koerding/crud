@@ -1,8 +1,8 @@
-"""Crud-aware calibration test for adjusted associations.
+"""Crud-aware test for adjusted associations.
 
 Implements the crud-aware p-value framework. Given a data matrix X and target
-feature pairs, removes K principal components and calibrates adjusted
-correlations against the empirical background of all (or a Monte Carlo sample
+feature pairs, removes K principal components and tests adjusted
+correlations against the empirical null of all (or a Monte Carlo sample
 of) feature pairs.
 
 Two interfaces:
@@ -112,7 +112,7 @@ def _pairwise_corrs(Xz: np.ndarray, pairs: List[Tuple[int, int]]) -> np.ndarray:
 
 @dataclass
 class CrudTestResult:
-    """Result of a crud-aware calibration test."""
+    """Result of a crud-aware test."""
 
     target_pairs: list
     adjusted_correlations: np.ndarray
@@ -162,7 +162,7 @@ def crud_test(
     strata: Optional[np.ndarray] = None,
     seed: int = 42,
 ) -> CrudTestResult:
-    """Crud-aware calibration test for adjusted associations.
+    """Crud-aware test for adjusted associations.
 
     Parameters
     ----------
@@ -441,7 +441,7 @@ def crud_z_test(
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Crud-aware calibration test for adjusted associations."
+        description="Crud-aware test for adjusted associations."
     )
     parser.add_argument(
         "--data",

@@ -21,12 +21,12 @@ Define the population residual correlation for $i\neq j$ by
 \end{equation}
 
 
-\subsection{Crud-aware p-values via random-pair calibration}
+\subsection{Crud-aware p-values via the empirical null}
 \label{app:crud-aware-pvalues}
 
 A natural question is whether an observed adjusted association is unusual for the domain or merely typical background dependence.
-This subsection defines a ``crud-aware'' p-value that calibrates an observed adjusted association against the empirical background of the domain. The key idea is to treat the realized dataset as fixed and define a reference distribution by drawing feature pairs uniformly at random, while running the same preprocessing and adjustment pipeline as for the target pair.
-The resulting calibration provides an assumption-light baseline for whether an observed association is distinctive.
+This subsection defines a ``crud-aware'' p-value that tests an observed adjusted association against the domain's empirical null. The key idea is to treat the realized dataset as fixed and define a reference distribution by drawing feature pairs uniformly at random, while running the same preprocessing and adjustment pipeline as for the target pair.
+The resulting empirical null provides an assumption-light baseline for whether an observed association is distinctive.
 
 \paragraph{Adjusted association statistic.}
 Let $\mathbf{X}\in\R^{n\times p}$ denote the observed data matrix (columns are features). Fix an adjustment procedure $A_K$ (for example: regress each feature on the top $K$ principal component scores and standardize the residuals). For any feature pair $(a,b)$ with $1\le a<b\le p$, define a one-dimensional adjusted association statistic
@@ -61,7 +61,7 @@ In practice, $p_{\mathrm{crud}}(i,j)$ is approximated by sampling $M$ reference 
 When features are heterogeneous in type or scale, reference pairs should be stratified (e.g., within the same modality, ROI, or gene family) so the baseline matches the target claim. When crud-aware p-values are computed for many pre-specified pairs, standard multiplicity corrections (e.g., Benjamini--Hochberg) can be applied. The definition of $p_{\mathrm{crud}}$ depends only on the choice of adjustment pipeline and statistic; alternative adjustment strategies are compared in Appendix~\ref{app:alt-adjust}.
 
 \paragraph{A parametric crud-aware test for small studies.}
-The empirical calibration above requires a data matrix large enough to estimate the background distribution of pairwise associations.
+The empirical null above requires a data matrix large enough to estimate the background distribution of pairwise associations.
 Many studies, however, measure only a handful of variables on a small sample---a psychologist recruiting $n=20$ participants and computing a single correlation, for instance.
 Such a study can be understood as observing a small submatrix of the much larger data matrix one \emph{could} have collected had the budget permitted measuring all variables in the domain.
 The crud factor operates at the level of the full domain: if the typical background correlation among personality measures is $\sigma_{\mathrm{crud}}\approx 0.15$, that background does not disappear simply because the investigator chose to measure only two of them.
@@ -77,26 +77,26 @@ The quantity $\sigma_{\mathrm{crud}}$ characterizes the spread of background cor
 \begin{theorem}[Parametric crud-aware test]\label{thm:parametric-crud}
 Suppose the pair $(I,J)$ is drawn uniformly at random from $\{(a,b): 1\le a<b\le p\}$, and conditionally on $(I,J)$, the sample correlation $\hat\rho$ satisfies
 \begin{equation}\label{eq:sample-corr-approx}
-\hat\rho = \rho_{IJ} + \varepsilon, \qquad \varepsilon\sim\mathcal{N}(0, \sigma_n^2), \qquad \sigma_n^2 = \frac{1-\rho_{IJ}^2}{n-1}\approx\frac{1}{n-1},
+\hat\rho = \rho_{IJ} + \varepsilon, \qquad \varepsilon\mathrel{\dot{\sim}}\mathcal{N}(0, \sigma_n^2), \qquad \sigma_n^2 \approx \frac{(1-\rho_{IJ}^2)^2}{n-1}\approx\frac{1}{n-1},
 \end{equation}
 where $\varepsilon$ is independent of $(I,J)$ and the approximation $\sigma_n^2\approx 1/(n-1)$ holds when $|\rho_{IJ}|$ is small.
 Further suppose that the population correlation $\rho_{IJ}$, viewed as a random variable over the uniform draw of pairs, satisfies
 \begin{equation}\label{eq:crud-null-dist}
 \rho_{IJ} \sim \mathcal{N}(0, \sigma_{\mathrm{crud}}^2).
 \end{equation}
-Then the marginal distribution of the sample correlation under the crud null is
+Then the marginal distribution of the sample correlation under the crud null is approximately
 \begin{equation}\label{eq:marginal-crud}
-\hat\rho \sim \mathcal{N}\!\left(0,\; \sigma_{\mathrm{crud}}^2 + \frac{1}{n-1}\right).
+\hat\rho \mathrel{\dot{\sim}} \mathcal{N}\!\left(0,\; \sigma_{\mathrm{crud}}^2 + \frac{1}{n-1}\right).
 \end{equation}
 \end{theorem}
 
 \begin{proof}
-Write $\hat\rho = \rho_{IJ} + \varepsilon$.  By assumption, $\rho_{IJ}\sim\mathcal{N}(0,\sigma_{\mathrm{crud}}^2)$ and $\varepsilon\sim\mathcal{N}(0, 1/(n-1))$, and these are independent (the sampling noise $\varepsilon$ is conditionally independent of the pair identity given $\rho_{IJ}$, and under the Gaussian approximation in~\eqref{eq:sample-corr-approx} with $\sigma_n^2\approx 1/(n-1)$, the conditional variance does not depend on $\rho_{IJ}$).
-The sum of two independent Gaussians is Gaussian with variance equal to the sum of variances:
+Write $\hat\rho = \rho_{IJ} + \varepsilon$.  By assumption, $\rho_{IJ}\sim\mathcal{N}(0,\sigma_{\mathrm{crud}}^2)$ and $\varepsilon\mathrel{\dot{\sim}}\mathcal{N}(0, 1/(n-1))$. Under the approximation in~\eqref{eq:sample-corr-approx} with $\sigma_n^2\approx 1/(n-1)$, the conditional variance of the sampling noise does not depend on $\rho_{IJ}$, allowing us to treat them as independent.
+The sum of two independent Gaussians is Gaussian, and their variances add:
 \begin{equation}
-\Var(\hat\rho) = \Var(\rho_{IJ}) + \Var(\varepsilon) = \sigma_{\mathrm{crud}}^2 + \frac{1}{n-1}.
+\Var(\hat\rho) \approx \Var(\rho_{IJ}) + \Var(\varepsilon) \approx \sigma_{\mathrm{crud}}^2 + \frac{1}{n-1}.
 \end{equation}
-Both components have zero mean, so $\E[\hat\rho]=0$, yielding~\eqref{eq:marginal-crud}.
+Both components have zero mean, so $\E[\hat\rho]=0$, yielding the approximate distribution in~\eqref{eq:marginal-crud}.
 \end{proof}
 
 \paragraph{The crud-aware $z$-test.}
@@ -125,7 +125,7 @@ Second, the linearization $\sigma_n^2\approx 1/(n-1)$, which is standard for $|\
 
 In practice, $\sigma_{\mathrm{crud}}$ must be estimated from external data, introducing additional uncertainty.
 We recommend reporting the conclusion for a range of plausible $\sigma_{\mathrm{crud}}$ values as a sensitivity analysis.
-When a large reference dataset is available, the full empirical calibration of Section~\ref{app:crud-aware-pvalues} is preferable.
+When a large reference dataset is available, the full empirical null of Section~\ref{app:crud-aware-pvalues} is preferable.
 The parametric version is intended for the common setting where only summary statistics are at hand---a simple corrective to the standard practice of testing against the independence null alone.
 
 
@@ -209,8 +209,14 @@ Taking expectations gives
 \begin{equation}
 \E[\Sigma^{(K)}_{ii}]=\sum_{k>K}\lambda_k\E[v_{ik}^2]=\frac{1}{p}T_1(K).
 \end{equation}
-Under Assumption~\ref{ass:haar}, $\Sigma^{(K)}_{ii}$ concentrates around its mean with relative
-fluctuations $o_p(1)$ (a standard consequence of bounded fourth moments and orthogonality).
+Under Assumption~\ref{ass:haar}, $\Var(\Sigma^{(K)}_{ii})\approx\frac{2}{p^2}T_2(K)$,
+so the relative fluctuation is $\Var(\Sigma^{(K)}_{ii})/\E[\Sigma^{(K)}_{ii}]^2\approx 2\sigma_K^2$.
+Provided the eigenvalue tail is broad enough that $\sigma_K\to 0$
+(which holds when $\alpha\le 1$, or as $K\to\infty$ for any $\alpha>1/2$),
+$\Sigma^{(K)}_{ii}$ concentrates around its mean with relative fluctuations $o_p(1)$.
+For fixed small $K$ with $\alpha>1$, $\sigma_K$ remains a moderate constant and the
+formula below becomes an approximation whose quality is verified empirically in
+Appendix~\ref{app:assumption-audit} (Test~4).
 Hence
 \begin{equation}
 \sqrt{\Sigma^{(K)}_{ii}\Sigma^{(K)}_{jj}}=\frac{1}{p}T_1(K)\cdot \bigl(1+o_p(1)\bigr).

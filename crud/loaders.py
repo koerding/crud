@@ -254,7 +254,7 @@ def load_hexaco_data(*, visualize: bool = False) -> np.ndarray:
     Returns (n_respondents, p_items) ≈ (22786, 242). Items are Likert-scale
     questionnaire responses across 6 personality domains with 4 facets each.
     Used as a positive control: within-facet item pairs should show strong
-    correlations that survive crud-aware calibration.
+    correlations that clear the crud-aware empirical null.
     """
     url = "https://www.dropbox.com/scl/fi/gpis8v7ojcwegqqco9ede/HEXACO.zip?rlkey=tnupayuu8bpwfgw8i50xtbub8&dl=1"
     zip_path = "data/raw/HEXACO.zip"

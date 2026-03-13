@@ -293,9 +293,9 @@ not of the particular adjustment method.
 \subsection{Additional worked examples}
 \label{app:additional-examples}
 
-\paragraph{NHANES biomarkers.} Hemoglobin and hematocrit are known to be near-deterministically related (hematocrit $\approx 3\times$ hemoglobin by definition). In the NHANES dataset ($n = 29{,}902$), their correlation is $r = 0.91$. Applying the crud-aware $z$-test with $\sigma_{\mathrm{crud}} = 0.093$ (NHANES at $K=10$) gives $z_{\mathrm{crud}} = 9.8$, $p_{\mathrm{crud}} < 10^{-20}$. Similarly, ALT and AST (both liver transaminases reflecting hepatocyte damage) correlate at $r = 0.83$, giving $z_{\mathrm{crud}} = 8.9$. Both associations survive the the crud-aware test by a wide margin, as expected for pairs with known mechanistic relationships.
+\paragraph{NHANES biomarkers.} Hemoglobin and hematocrit are known to be near-deterministically related (hematocrit $\approx 3\times$ hemoglobin by definition). In the NHANES dataset ($n = 29{,}902$), their correlation is $r = 0.91$. Applying the crud-aware $z$-test with $\sigma_{\mathrm{crud}} = 0.093$ (NHANES at $K=10$) gives $z_{\mathrm{crud}} = 9.8$, $p_{\mathrm{crud}} < 10^{-20}$. Similarly, ALT and AST (both liver transaminases reflecting hepatocyte damage) correlate at $r = 0.83$, giving $z_{\mathrm{crud}} = 8.9$. Both associations survive the crud-aware test by a wide margin, as expected for pairs with known mechanistic relationships.
 
-\paragraph{GTEx RNA-seq.} Most cis-eQTLs reported in the GTEx v8 atlas have small effect sizes, with only about 22\% showing $>$2-fold effects \citep{gtex2020}. Using the GTEx v8 per-sample TPM data for skeletal muscle (top 10,000 genes by variance across 803 samples), the crud distribution at $K=10$ has a background SD of 0.10. A typical small cis-eQTL effect of $r=0.10$ sits at only the 71st crud percentile---squarely within the bulk of background gene--gene correlations. Even $r=0.20$ reaches only the 95th percentile. Only effects with $r>0.30$ (the 99th percentile, $3\times$ the background SD) are clearly distinctive. Since most reported cis-eQTLs have small effect sizes, much of the GTEx catalog may not be distinguishable from background transcriptomic dependence using association magnitude alone.
+\paragraph{GTEx RNA-seq.} Most cis-eQTLs reported in the GTEx v8 atlas have small effect sizes, with only about 22\% showing $>$2-fold effects \citep{gtex2020}. Using the GTEx v8 per-sample TPM data for skeletal muscle (top 10,000 genes by variance across 803 samples), the empirical null at $K=10$ has a background SD of 0.10. A typical small cis-eQTL effect of $r=0.10$ sits at only the 71st crud percentile---squarely within the bulk of background gene--gene correlations. Even $r=0.20$ reaches only the 95th percentile. Only effects with $r>0.30$ (the 99th percentile, $3\times$ the background SD) are clearly distinctive. Since most reported cis-eQTLs have small effect sizes, much of the GTEx catalog may not be distinguishable from background transcriptomic dependence using association magnitude alone.
 
 \subsection{Positive control: known-strong pairs clear the empirical null}
 \label{app:positive-control}
@@ -303,7 +303,7 @@ not of the particular adjustment method.
 The empirical null framework (Section~\ref{app:crud-aware-pvalues}) is designed to
 flag associations that stand out from the background. A natural concern is whether genuinely
 strong associations---pairs with known biological or psychometric relationships---do in fact
-survive this calibration. If the crud-aware null swallowed real signal, it would be too
+survive this test. If the crud-aware null swallowed real signal, it would be too
 conservative to be useful.
 
 We test this using two datasets where ground-truth group structure is available:

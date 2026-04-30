@@ -1,0 +1,79 @@
+\section{Evidence that small-effect overclaiming is widespread}
+\label{app:overclaim}
+
+The main text argues that writing as if small adjusted associations were substantively meaningful is a widely shared practice across empirical sciences. This appendix gives a compact, field-by-field summary of the meta-research behind that claim. Each row of the table is anchored on a single canonical meta-research paper, and every quantitative claim in the row is taken directly from that paper, so each row can be audited against one source. Power/inflation and effect-size distributions are linked mechanistically: \citet{gelman2014} show that significance filtering under low power inflates published effect magnitudes (Type~M error), and \citet{ioannidis2008winner} documents the corresponding empirical pattern across disciplines. Table rows are ordered from the most observational fields (for which the crud-scale argument applies most directly) to the most design-mixed.
+
+\paragraph{How this table was built.}
+Fields were selected to span the empirical sciences where small adjusted observational associations are routinely interpreted as causal evidence. Within each field we anchor the row on a single widely-cited meta-research paper that quantifies either statistical power, effect-size inflation, or the distribution of published effect sizes; all numbers in the row come from that paper. We did not perform a de novo meta-analysis. For ``Design mix'', clean published experimental-vs-observational shares are not available for most fields; entries are a qualitative dominant-design label. All numbers are summary statistics of effect-size distributions, not single-study point estimates, and are intended as order-of-magnitude benchmarks.
+
+{\footnotesize
+\renewcommand{\arraystretch}{1.2}
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{p{0.11\linewidth} p{0.09\linewidth} p{0.11\linewidth} p{0.18\linewidth} p{0.18\linewidth} p{0.21\linewidth}}
+\caption{Field-by-field evidence that small published effects are often underpowered and inflated, paired with the prevailing study-design mix and with the typical effect-size magnitudes that published work actually discusses. Each row is anchored on a single meta-research paper; every number in the row is taken from that paper. Rows are ordered from most observational (top) to most design-mixed (bottom). Across fields the typical published-effect magnitudes cluster in the range $|r|\approx 0.01$--$0.21$, which overlaps the empirical crud scales reported in Table~\ref{tab:crud-scale}. The crud-aware test complements power- and inflation-based diagnostics: even when a study is well-powered for its point null, a statistically significant adjusted association of typical field magnitude may still be indistinguishable from the domain's background dependence.\label{tab:overclaim-evidence}} \\
+\toprule
+Field & Design mix & Reference & What the paper shows & Key number from that paper & Typical published effect size reported \\
+\midrule
+\endfirsthead
+\multicolumn{6}{c}{\tablename\ \thetable\ -- \textit{continued from previous page}} \\
+\toprule
+Field & Design mix & Reference & What the paper shows & Key number from that paper & Typical published effect size reported \\
+\midrule
+\endhead
+\midrule
+\multicolumn{6}{r}{\textit{continued on next page}} \\
+\endfoot
+\bottomrule
+\endlastfoot
+Medicine / observational epidemiology &
+$>$95\% obs. &
+\citet{siontis2011} &
+Survey of nominally significant risk-factor and intervention associations with tiny effects in the published medical literature. &
+51 statistically significant associations identified with $\mathrm{RR}\in[0.95,1.05]$; $>$50\% of papers reporting them expressed no concern about effect-size magnitude. &
+$\mathrm{RR}\approx 1.05$, i.e., $|r|\lesssim 0.025$. \\
+\midrule
+Nutritional epidemiology &
+$>$90\% obs. &
+\citet{schoenfeld2013} &
+``Cookbook review'' of meta-analyses on cancer associations for 50 common ingredients. &
+40 of 50 ingredients had cancer studies; $\sim$77\% of those studies reported an association (39\% increased, 33\% decreased risk); meta-analyses washed most out toward the null. &
+Median meta-analytic $\mathrm{RR}=0.96$, IQR $0.85$--$1.10$, i.e., $|r|\lesssim 0.05$. \\
+\midrule
+Genetics (common-variant) &
+100\% obs. &
+\citet{park2010} &
+Direct estimation of the effect-size distribution for SNPs identified by GWAS, fitted to height, Crohn's disease, and breast-cancer susceptibility. &
+Estimated per-variant effect-size distribution is heavily concentrated at very small effects across all three traits. &
+Per-variant $R^2\ll 0.001$, i.e., $|r|<0.03$ for typical common-variant complex-trait SNPs. \\
+\midrule
+Neuroscience (BWAS) &
+Mixed; BWAS obs. &
+\citet{marek2022} &
+Brain-wide association studies in three large neuroimaging cohorts; tests the sample size needed for reliable detection. &
+Reliable detection of typical brain--behavior associations requires sample sizes in the thousands. &
+Median univariate brain--behavior $|r|\approx 0.01$; top $1\%$ of associations reach $|r|>0.06$; single largest replicated effect $|r|=0.16$. \\
+\midrule
+Psychology &
+Mixed (exp.-leaning) &
+\citet{richard2003} &
+Century-scale quantitative synthesis of social-psychology effect sizes. &
+474 meta-analytic effects synthesized from $>$25{,}000 primary studies. &
+Mean $|r|\approx 0.21$ across all synthesized effects. \\
+\midrule
+Economics &
+Mostly obs.; RCTs $<$10\% &
+\citet{ioannidis2017econ} &
+Power meta-analysis of the empirical economics literature. &
+Median statistical power $\sim$18\%; typical published effects roughly double the meta-analytic consensus. &
+Median $|r_{\mathrm{partial}}|\approx 0.07$ across 64{,}076 estimates from 159 meta-analyses. \\
+\midrule
+Behavioural ecology / evolution &
+Mixed (lab + field) &
+\citet{mollerjennions2002} &
+Synthesis of effect sizes across ecology and evolution meta-analyses. &
+43 meta-analyses synthesized. &
+Mean $|r|\approx 0.18$--$0.19$ (mean $r^2\approx 2.5$--$5.4\%$). \\
+\end{longtable}
+}
+
+A consistent pattern emerges. Across all seven fields, the typical effect size that published work treats as substantively meaningful falls in the range $|r|\approx 0.01$--$0.21$ (or the odds-ratio/relative-risk equivalents). Critically, these typical effect sizes are of the same order as---and in several fields smaller than---the empirical crud scales we report across nine datasets (Table~\ref{tab:crud-scale}, where $\sigma_{\mathrm{crud}}^{(K=0)}$ ranges from $0.04$ to $0.19$). The ``Design mix'' column also locates where the paper's contribution is sharpest: in the four fields that are essentially entirely observational (medicine / epidemiology, nutritional epidemiology, common-variant genetics, BWAS-style neuroscience), the crud-scale argument applies directly; in the three fields with substantial experimental or quasi-experimental components (psychology, economics, behavioural ecology), randomization or design-based identification breaks the generic-dependence problem for the experimental subset, but power and inflation issues persist. The interpretive step this paper targets---treating a small, statistically significant adjusted association as support for a causal claim---is therefore being taken under conditions that the surrounding meta-research suggests cannot, on average, support it, and against a background of generic dependence that is numerically of similar magnitude. Our contribution is orthogonal and complementary to the power/inflation literature: we ask, in addition, whether a given small adjusted association is distinguishable from the domain's empirical null.

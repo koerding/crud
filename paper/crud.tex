@@ -1,6 +1,7 @@
 \documentclass[11pt]{article}
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{booktabs}
+\usepackage{longtable}
 \usepackage[margin=1in]{geometry}
 \usepackage{graphicx}
 \usepackage{natbib}
@@ -41,9 +42,12 @@
 Code and the interactive demo are available at \url{https://github.com/koerding/crud} and \url{https://koerding.github.io/crud/}. A standalone crud-aware test calculator is at \url{https://koerding.github.io/crud/test.html}. The draft PDF is at \url{https://raw.githubusercontent.com/koerding/crud/master/paper/crud.pdf}.
 
 \appendix
+\numberwithin{table}{section}
+\numberwithin{figure}{section}
 \section*{Appendix}
 \input{bridge_lemmas}
 \input{assumption_audit}
+\input{overclaim_appendix}
 \input{robustness}
 
 \bibliographystyle{plainnat}

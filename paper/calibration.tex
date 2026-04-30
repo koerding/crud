@@ -32,7 +32,7 @@ The $z$-test denominator $\sqrt{\sigma_{\mathrm{crud}}^2 + 1/(n-1)}$ reveals a n
 When $n$ is small (specifically $n \ll 1/\sigma_{\mathrm{crud}}^2$), sampling noise is the dominant source of uncertainty, so larger samples genuinely increase power to detect effects. But once $n$ is large enough that the sampling noise $1/(n-1)$ becomes small relative to the crud variance $\sigma_{\mathrm{crud}}^2$, the denominator is approximately $\sigma_{\mathrm{crud}}$ regardless of $n$: the bottleneck is no longer imprecise estimation but the fact that background correlations are themselves nonzero. Additional observations measure the crud more precisely but do not help separate signal from background.
 Because $\sigma_{\mathrm{crud}} \approx 0.02$--$0.14$ across the domains in Table~\ref{tab:crud-scale} (at $K=10$), the crossover occurs at roughly $n \approx 50$--$2{,}500$.
 Beyond this point, classical $p$-values continue to shrink---explaining why massive studies routinely report ``significant'' but tiny effects---while the crud-aware $p$-value plateaus.
-For the purpose of distinguishing small associations from background dependence, there are sharply diminishing returns to collecting more than a few thousand observations per study.
+For this specific purpose, there are sharply diminishing returns to collecting more than a few thousand observations beyond the crossover; this does not apply to the many other reasons a study might collect more data---improving precision on a known effect, supporting subgroup analysis, replicating a published finding, or detecting effects that are themselves much larger than the crud scale.
 Although larger $n$ can in principle support larger $K$, in high-dimensional data $K$ grows slowly relative to $p$ and estimation noise in adjustment accumulates, so $\sigma_K$ shrinks too slowly to close the gap.
 
 \begin{center}
@@ -51,6 +51,8 @@ An online calculator implementing this test is at \url{https://koerding.github.i
 
 \subsection{Worked examples}
 \label{sec:worked-examples}
+
+The two examples below are illustrative endpoints---a psychometric within-construct pair (designed to load on the same latent trait) and a borderline-significant epidemiological finding---chosen to bracket the magnitude range, not as random draws from the literature.
 
 \paragraph{A large effect that clears the crud scale.} In the HEXACO personality inventory ($p=242$ items, $n=100{,}000$), items within the same personality facet are designed to measure the same underlying trait. The median within-facet correlation is $|r|=0.32$ at $K=0$, and 55\% of within-facet pairs fall in the top 5\% of the empirical null ($11\times$ enrichment over chance). Applying the crud-aware $z$-test with $\sigma_{\mathrm{crud}} = 0.144$ (HEXACO at $K=0$) gives $z_{\mathrm{crud}} = 2.2$ for the median pair, $p_{\mathrm{crud}} = 0.03$. After removing 10~PCs, 29\% of within-facet pairs remain in the top 5\% ($6\times$ enrichment). Known-strong associations clear the empirical null.
 

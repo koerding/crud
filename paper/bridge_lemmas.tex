@@ -120,13 +120,59 @@ In this regime, the classical test is detecting crud, not signal.
 \paragraph{Assumptions and practical guidance.}
 The derivation relies on two approximations.
 First, the Gaussian model~\eqref{eq:crud-null-dist} for the distribution of population correlations over random pairs.
-This is supported by the empirical observation (Section~\ref{app:crud-aware-pvalues} and the normality audit in the main text) that residual correlations are well-approximated by a Gaussian after removing top principal components.
+The audit (Appendix~\ref{app:assumption-audit}, Test~5) finds that residual correlations are typically heavier-tailed than Gaussian, with excess kurtosis up to $\approx 35$ in the most affected datasets (NHANES) and skewness up to $\approx 3$.
+Heavy tails put more mass in the upper percentiles than a Gaussian formula predicts, so a parametric crud-aware $p$-value will tend to understate how typical a moderately large $|r|$ actually is---i.e., the parametric test is anti-conservative in the tail in those datasets.
+We have no general analytic correction for this; the recommendation is to use the full empirical null (Section~\ref{app:crud-aware-pvalues}) whenever the reference dataset is large enough, and to treat the parametric formula as an approximate tool when only summary statistics are available.
 Second, the linearization $\sigma_n^2\approx 1/(n-1)$, which is standard for $|\rho|$ not too close to $\pm 1$ and $n$ not too small.
 
 In practice, $\sigma_{\mathrm{crud}}$ must be estimated from external data, introducing additional uncertainty.
 We recommend reporting the conclusion for a range of plausible $\sigma_{\mathrm{crud}}$ values as a sensitivity analysis.
-When a large reference dataset is available, the full empirical null of Section~\ref{app:crud-aware-pvalues} is preferable.
-The parametric version is intended for the common setting where only summary statistics are at hand---a simple corrective to the standard practice of testing against the independence null alone.
+The parametric version is intended for the common setting where only summary statistics are at hand---a simple corrective to the standard practice of testing against the independence null alone, with the heavy-tail caveat above.
+
+
+\subsection{Comparing scales: $r$, RR, and $\sigma_K$}
+\label{app:scale-bridge}
+
+Reported effect sizes in the empirical sciences arrive on multiple incommensurate scales: Pearson $r$, partial correlations, $r^2$, relative risk RR, odds ratio OR, hazard ratio HR, Cohen's $d$. To compare any of these to a crud scale $\sigma_K$ (in correlation units), conversion is needed.
+
+For a binary exposure $X\in\{0,1\}$ with prevalence $p_X=\Pr[X=1]$ and a binary outcome $Y\in\{0,1\}$ with prevalence $p_Y=\Pr[Y=1]$, the population Pearson correlation between $X$ and $Y$ corresponding to a relative risk $\mathrm{RR}=\Pr[Y=1\mid X=1]/\Pr[Y=1\mid X=0]$ is
+\begin{equation}\label{eq:rr-to-r}
+r \;=\; \frac{p_X(1-p_X)\,(\mathrm{RR}-1)\,p_Y}{(\mathrm{RR}\,p_X + 1 - p_X)\,\sqrt{p_X(1-p_X)\,p_Y(1-p_Y)}},
+\end{equation}
+obtained by computing $\Pr[X=1,Y=1]$ from RR, $p_X$, $p_Y$ and substituting into $r=\Cov(X,Y)/\sqrt{\Var(X)\Var(Y)}$.
+
+Equation~\eqref{eq:rr-to-r} is sensitive to both prevalences. Table~\ref{tab:rr-to-r} reports a single benchmark slice: $p_X=0.20$, $p_Y=0.06$, chosen as a rough match to a smoking-prevalence/lung-cancer-incidence-style setting, with $r/\sigma_K$ taken against NHANES $\sigma_K(K=10)=0.093$ (the only one of our nine datasets that resembles a general-health observational cohort).
+
+\begin{table}[h]
+\centering
+\caption{Conversion from relative risk to Pearson $r$ at fixed prevalences ($p_X=0.20$, $p_Y=0.06$), and to multiples of the NHANES residual scale at $K=10$ ($\sigma_K=0.093$).}
+\label{tab:rr-to-r}
+\begin{tabular}{rcc}
+\toprule
+RR & $r$ from~\eqref{eq:rr-to-r} & $r/\sigma_K$ \\
+\midrule
+$1.05$ & $0.005$ & $0.05$ \\
+$1.10$ & $0.011$ & $0.11$ \\
+$1.50$ & $0.046$ & $0.49$ \\
+$2$    & $0.084$ & $0.90$ \\
+$3$    & $0.144$ & $1.55$ \\
+$5$    & $0.224$ & $2.41$ \\
+$7$    & $0.276$ & $2.97$ \\
+$10$   & $0.325$ & $3.49$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Caveats.}
+This bridge is approximate and should be read as order-of-magnitude.
+(i) The mapping in~\eqref{eq:rr-to-r} is exact only for binary $X$ and $Y$. Many published RRs are reported from continuous, ordinal, or time-to-event exposures, where binary-RR-to-$r$ is a heuristic.
+(ii) The output is sensitive to both $p_X$ and $p_Y$. Doubling $p_Y$ at fixed RR can change $r$ by a factor of $\sqrt{2}$ or more; halving $p_X$ from $0.5$ to $0.05$ at fixed RR$=1.5$ changes $r$ from $0.10$ to $0.04$. Table~\ref{tab:rr-to-r} therefore fixes one prevalence pair; reading other rows in the empirical literature requires recomputing with that domain's prevalences.
+(iii) The reference $\sigma_K$ in the table is NHANES, which is observational health-survey data and not a smoking-cancer-specific reference; matched references would change $r/\sigma_K$.
+(iv) For odds ratios under low outcome prevalence, $\mathrm{OR}\approx \mathrm{RR}$ and~\eqref{eq:rr-to-r} applies directly; for higher prevalences OR and RR diverge.
+(v) Hazard ratios from time-to-event analyses can be roughly converted via $r\approx \log(\mathrm{HR})/(\mathrm{SE}(\log\mathrm{HR})\sqrt{n})$ \citep[as we use for the folate worked example,][\S\ref{sec:worked-examples}]{liu2022}, but this depends on duration and censoring structure.
+(vi) For continuous standardized variables, $r$ equals the standardized regression coefficient $\beta$; for $r^2$ to $|r|$ the conversion is $|r|=\sqrt{r^2}$.
+
+We use~\eqref{eq:rr-to-r} in two places: the smoking--lung-cancer comparison in the Discussion and the cross-field summary in Appendix~\ref{app:overclaim}. Both treat the converted values as approximate.
 
 
 \subsection{Eigenvector delocalization assumption}

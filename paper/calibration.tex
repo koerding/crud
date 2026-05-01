@@ -28,6 +28,9 @@ These statements are for fixed adjustment ($K$ fixed), which is the realistic re
 A study with $n=200$ and $r=0.15$ yields $p<0.05$ classically, yet $p_{\mathrm{crud}}\approx 0.37$ when $\sigma_{\mathrm{crud}}=0.15$: the observed association is entirely typical of the domain background.
 In this regime, the classical test is detecting crud, not signal.
 
+\paragraph{Calibration of the parametric test.}
+The Gaussian approximation underlying~\eqref{eq:z-crud} is only approximate; in datasets where the off-diagonal residual correlation distribution is heavy-tailed, the parametric formula's bias is non-monotonic in $|r|$. We quantify this in Appendix~\ref{app:bridge-lemmas} (Table~\ref{tab:heavy-tail-cal}) for the two most kurtotic of our nine datasets (NHANES, RNASeq). The headline: at the conventional 5\% threshold ($|r|\approx 2\sigma_{\mathrm{crud}}$) the parametric formula is broadly calibrated; below $p_{\mathrm{crud}}\approx 0.01$ it understates true tail mass by orders of magnitude. Read parametric $p$-values literally only at the conventional threshold; for stronger claims, use the full empirical null.
+
 \paragraph{Diminishing returns beyond $n \approx 1/\sigma_{\mathrm{crud}}^2$.}
 The crud-aware framework also yields a concrete insight about sample size.
 The $z$-test denominator $\sqrt{\sigma_{\mathrm{crud}}^2 + 1/(n-1)}$ reveals a natural crossover.
@@ -46,7 +49,7 @@ Although larger $n$ can in principle support larger $K$, in high-dimensional dat
 \item Compute $z_{\mathrm{crud}} = |r|/\sqrt{\sigma_{\mathrm{crud}}^2 + 1/(n-1)}$ and compare to standard normal critical values ($z>1.96$ for two-sided $p<0.05$). Report the crud-aware $p$-value alongside the classical one.
 \end{enumerate}
 We recommend reporting conclusions for a range of plausible $\sigma_{\mathrm{crud}}$ values as a sensitivity analysis.
-When a large reference dataset is available, the full empirical null is preferable.
+When a large reference dataset is available, the full empirical null is preferable, especially for $p_{\mathrm{crud}}<0.01$ where the parametric formula loses calibration in heavy-tailed domains (Appendix~\ref{app:bridge-lemmas}, Table~\ref{tab:heavy-tail-cal}).
 An online calculator implementing this test is at \url{https://koerding.github.io/crud/test.html}.
 }}
 \end{center}

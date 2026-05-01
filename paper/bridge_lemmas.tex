@@ -121,8 +121,28 @@ In this regime, the classical test is detecting crud, not signal.
 The derivation relies on two approximations.
 First, the Gaussian model~\eqref{eq:crud-null-dist} for the distribution of population correlations over random pairs.
 The audit (Appendix~\ref{app:assumption-audit}, Test~5) finds that residual correlations are typically heavier-tailed than Gaussian, with excess kurtosis up to $\approx 35$ in the most affected datasets (NHANES) and skewness up to $\approx 3$.
-Heavy tails put more mass in the upper percentiles than a Gaussian formula predicts, so a parametric crud-aware $p$-value will tend to understate how typical a moderately large $|r|$ actually is---i.e., the parametric test is anti-conservative in the tail in those datasets.
-We have no general analytic correction for this; the recommendation is to use the full empirical null (Section~\ref{app:crud-aware-pvalues}) whenever the reference dataset is large enough, and to treat the parametric formula as an approximate tool when only summary statistics are available.
+The bias direction is non-monotonic in $|r|$. Near the bulk the parametric formula \emph{overstates} tail mass (because Gaussian tails fall off slower than the empirical tails right above zero, in datasets whose mass is concentrated near the center); in the deep tail the parametric formula \emph{understates} tail mass (because the empirical distributions have heavy tails). To make this concrete, Table~\ref{tab:heavy-tail-cal} compares empirical and parametric two-sided crud-aware $p$-values at representative target $|r|$ in the two most kurtotic of our nine datasets:
+
+\begin{table}[h]
+\centering
+\caption{Empirical vs.\ parametric two-sided crud-aware $p$-values at representative target $|r|$, in the two most kurtotic of our nine datasets at $K=10$. Empirical $p$ is the fraction of off-diagonal residual correlations with $|r_{\text{resid}}|\ge t$; parametric $p$ uses Equation~\eqref{eq:z-crud} with the corresponding $\sigma_K$ and $n$.}
+\label{tab:heavy-tail-cal}
+\begin{tabular}{rcccccc}
+\toprule
+& \multicolumn{3}{c}{NHANES ($\sigma_K=0.094$, kurt $\approx 37$)} & \multicolumn{3}{c}{RNASeq ($\sigma_K=0.071$, kurt $\approx 13$)} \\
+\cmidrule(lr){2-4} \cmidrule(lr){5-7}
+$|r|$ & param. $p$ & emp. $p$ & ratio & param. $p$ & emp. $p$ & ratio \\
+\midrule
+$0.10$ & $0.290$ & $0.130$ & $0.45$ & $0.164$ & $0.099$ & $0.60$ \\
+$0.15$ & $0.112$ & $0.063$ & $0.56$ & $0.037$ & $0.036$ & $0.97$ \\
+$0.20$ & $0.034$ & $0.035$ & $1.01$ & $0.005$ & $0.018$ & $3.3$ \\
+$0.25$ & $0.008$ & $0.023$ & $2.8$ & $0.0005$ & $0.011$ & $22$ \\
+$0.30$ & $0.0015$ & $0.012$ & $8.4$ & $0.00003$ & $0.008$ & $270$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The agreement is within a factor of $\sim 1$ ($\sim 3$ in RNASeq) near the conventional 95th-percentile region $|r|\approx 2\sigma_K$. Deeper into the tail ($|r|\gtrsim 3\sigma_K$), the parametric formula understates true tail mass by one to several orders of magnitude. Practical implication: at the conventional $5\%$ threshold the parametric test is broadly calibrated; below $p\approx 0.01$ its $p$-values should not be read literally---for those, use the full empirical null (Section~\ref{app:crud-aware-pvalues}). We have no general analytic correction.
 Second, the linearization $\sigma_n^2\approx 1/(n-1)$, which is standard for $|\rho|$ not too close to $\pm 1$ and $n$ not too small.
 
 In practice, $\sigma_{\mathrm{crud}}$ must be estimated from external data, introducing additional uncertainty.

@@ -77,3 +77,26 @@ Mean variance explained $r^2 = 2.51$--$5.42\%$ across the synthesized estimates 
 }
 
 A consistent pattern emerges. The reported magnitudes are in different native units across rows, but standard conversions place them on a common scale. Pearson $|r|$ values are reported directly only by \citet{marek2022} (median brain--behavior $|r|\approx 0.01$, single largest replicated $|r|=0.16$), \citet{richard2003} (mean $|r|\approx 0.21$), and \citet{ioannidis2017econ} (average partial correlation/elasticity $\approx 0.17$). For the remaining rows, applying the binary RR-to-$r$ conversion of Equation~\eqref{eq:rr-to-r} (Appendix~\ref{app:scale-bridge}) and the $|r|=\sqrt{r^2}$ identity gives: $\mathrm{RR}\in[0.95,1.05]\Rightarrow |r|\lesssim 0.025$ (medicine, evaluated at high outcome prevalence; at the low prevalences typical of rare-disease epidemiology, $|r|$ is several-fold smaller), median $\mathrm{RR}=0.96\Rightarrow |r|\approx 0.02$ (nutrition, similarly prevalence-sensitive), per-variant variance $\le 1.96\%$ of genetic variance combined with heritabilities of order $0.5$--$0.8$ implying per-variant $|r|\lesssim 0.13$ (genetics), and $r^2=2.5$--$5.4\%\Rightarrow |r|\approx 0.16$--$0.23$ directly (behavioural ecology). All converted values inherit the caveats in Appendix~\ref{app:scale-bridge}. Together the typical published-effect magnitudes across the seven fields cluster in the range $|r|\approx 0.01$--$0.23$. Critically, these typical effect sizes are of the same order as---and in several fields smaller than---the empirical crud scales we report across nine datasets (Table~\ref{tab:crud-scale}, where $\sigma_{\mathrm{crud}}^{(K=0)}$ ranges from $0.04$ to $0.19$). The ``Design mix'' column also locates where the paper's contribution is sharpest: in the four fields that are essentially entirely observational (medicine / epidemiology, nutritional epidemiology, common-variant genetics, BWAS-style neuroscience), the crud-scale argument applies directly; in the three fields with substantial experimental or quasi-experimental components (psychology, economics, behavioural ecology), randomization or design-based identification breaks the generic-dependence problem for the experimental subset, but power and inflation issues persist. The interpretive step this paper targets---treating a small, statistically significant adjusted association as support for a causal claim---is therefore being taken under conditions where, on average, the cited meta-research finds power inadequate and reported effects inflated, and against a background of generic dependence that is numerically of similar magnitude. Our contribution is orthogonal and complementary to the power/inflation literature: we ask, in addition, whether a given small adjusted association is distinguishable from the domain's empirical null.
+
+\paragraph{Would the typical published effect clear the crud-aware threshold?} A direct way to read the table above against the test we propose is to ask, for each field, whether the typical reported magnitude exceeds the conventional 95th-percentile crud-aware threshold ($z_{\mathrm{crud}}>1.96$, i.e.\ $|r|>2\sigma_K$) against an approximately matched reference $\sigma_K$ from Table~\ref{tab:crud-scale} at $K=10$. The matchings below are illustrative, not domain-specific---the right comparison for a given paper would use a same-pipeline same-population $\sigma_K$.
+
+\begin{table}[h]
+\centering
+\caption{Field-level signal-to-crud ratios. ``Typical $|r|$'' is taken from the converted values in the conclusion above; reference $\sigma_K$ is matched approximately to each field's data modality at $K=10$ (Table~\ref{tab:crud-scale}); ``Verdict'' is whether the typical effect clears $|r|/\sigma_K>2$. Caveats from Appendix~\ref{app:scale-bridge} apply throughout.}
+\label{tab:field-ratios}
+\begin{tabular}{lcccl}
+\toprule
+Field & Typical $|r|$ & Reference $\sigma_K$ (dataset) & $|r|/\sigma_K$ & Verdict \\
+\midrule
+Medicine (RR$\sim$1.05) & $0.025$ & $0.093$ (NHANES) & $0.27$ & fails \\
+Nutrition (median RR$\,0.96$) & $0.04$ & $0.093$ (NHANES) & $0.43$ & fails \\
+Genetics (per-variant) & $\lesssim 0.13$ & $0.071$ (RNASeq) & $\lesssim 1.8$ & fails / marginal \\
+Neuroscience (BWAS median) & $0.01$ & $0.035$ (Kay fMRI) & $0.29$ & fails \\
+Psychology (mean) & $0.21$ & $0.046$ (HEXACO) & $4.6$ & clears \\
+Economics & $0.17$ & $0.093$ (NHANES) & $1.8$ & marginal \\
+Beh.\ ecology & $0.18$--$0.23$ & --- & --- & no analog \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The pattern is striking: in observational medicine, nutritional epidemiology, common-variant genetics, and BWAS-style neuroscience, the typical published effect would \emph{not} clear the crud-aware threshold against a matched reference. In social psychology the typical effect clears it comfortably; in economics it lands near the threshold; in behavioural ecology no clean analog exists in our nine datasets. The fields whose typical effects fall below the threshold are the same fields the meta-research literature has flagged for power and inflation problems---the test is not adding a new diagnosis, but it is providing a quantitative pass/fail at the per-paper level that the power/inflation literature has not.

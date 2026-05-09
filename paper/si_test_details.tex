@@ -1,0 +1,70 @@
+\section{Crud-aware testing: details and worked examples}
+\label{si:test-details}
+
+This section gives the operational details of the crud-aware test, the parametric small-study version, the calibration of the Gaussian formula against the empirical null, the handling of selected target pairs and stratified comparisons, and the full worked examples summarized in the main text.
+
+\subsection{Empirical null in detail}
+\label{si:empirical-null-detail}
+
+For a target pair $(i,j)$ with an adjusted association statistic (for example, a residual correlation after removing $K$ PCs), we compare its absolute value to the empirical distribution of absolute adjusted associations over uniformly sampled feature pairs from the same dataset, computed under the identical preprocessing and adjustment pipeline. The resulting crud-aware $p$-value is the fraction of random pairs whose absolute adjusted association exceeds the target's; the crud percentile is its complement. The comparison is magnitude-based (two-sided): we rank by absolute value. For a uniformly random target pair processed through the same pipeline, this empirical $p$-value is (approximately) uniform by construction (Appendix~\ref{app:bridge-lemmas}). For non-randomly chosen targets, the same test continues to control Type-I error \emph{only under the null} that the pair's true association is exchangeable with the domain background. Practically, reporting an adjusted association should include its percentile within the empirical null; associations below a chosen high percentile of that null (e.g., the 95th) should be reported as not distinctive against the domain background, leaving open whether other lines of evidence---design leverage, mechanism, replication---support a causal interpretation. The 95th and 99th are conventional thresholds, not principled ones; the appropriate cutoff depends on prior odds and decision costs.
+
+\paragraph{What the test does and does not claim.} Concretely, the crud-aware $p$-value is a percentile rank: the fraction of same-pipeline reference pairs whose adjusted association magnitude exceeds the target's. It \emph{does} answer ``is this association magnitude distinctive within the residual structure of this dataset, given the chosen adjustment.'' It \emph{does not} answer ``is the underlying causal effect distinguishable from zero,'' ``is the residual structure caused by latent confounding rather than incomplete adjustment,'' or ``is this association causally informative for the substantive question.'' Those are separate questions that require design leverage, mechanistic models, or external validation. A target whose magnitude clears the threshold has earned only that its size cannot be explained as typical of the same-pipeline background---a necessary, not sufficient, condition for a causal interpretation.
+
+\paragraph{Selected target pairs.} Real applications test pairs chosen because of prior knowledge or pilot evidence. Selection violates the exchangeability assumption that justifies the empirical $p$-value as a Type-I rate: a pair flagged by a prior scan of the same data is not exchangeable with a uniformly random pair. Three practical recommendations: (i) when feasible, choose target pairs from a pre-registered hypothesis or from external evidence (mechanism, prior literature, an independent dataset), so the selection is independent of the reference data; (ii) when the target was selected from the same data, report the crud-aware $p$-value as a magnitude-rank statistic rather than a Type-I-controlled test, alongside the standard multiple-testing correction over the universe from which the pair was selected; (iii) where features fall into natural strata (modality, gene family, region), compute the empirical null over the within-stratum reference distribution so the comparison matches the target's structural class. None of these fully restores Type-I control under arbitrary selection; they reduce, not eliminate, the bias.
+
+\paragraph{Distinction from multiple testing.} Unlike multiple-testing corrections, which assume a sharp null of zero effect, the crud-aware test uses an empirical null built from same-pipeline reference pairs whose residual associations are typically nonzero. It controls Type-I error under the empirical null---the hypothesis that the target pair's association is typical of the background---rather than under the classical null of zero effect. The approach is related to Efron's empirical null framework \citep{efron2004}, which estimates the null distribution of test statistics from data rather than assuming the theoretical $\mathcal{N}(0,1)$. The key difference is that Efron's empirical null corrects for correlation-induced inflation of null z-scores, whereas the crud empirical null reflects residual dependence that survives generic adjustment---whether that dependence stems from genuine latent structure or from incomplete adjustment is left open by the test, which only asks whether the target association is distinctive relative to the same-pipeline background.
+
+\paragraph{Stratified comparisons.} When dependence is heterogeneous, sample random pairs within the relevant comparison class (same modality, ROI, gene family, measurement type) so the baseline matches the target claim, and report which stratum was used.
+
+\subsection{Diminishing returns beyond \texorpdfstring{$n \approx 1/\sigma_{\mathrm{crud}}^2$}{n approximately 1/sigma\_crud squared}}
+\label{si:diminishing-returns}
+
+The crud-aware framework yields a concrete insight about sample size. The $z$-test denominator $\sqrt{\sigma_{\mathrm{crud}}^2 + 1/(n-1)}$ reveals a natural crossover. When $n$ is small ($n \ll 1/\sigma_{\mathrm{crud}}^2$), sampling noise dominates; larger samples genuinely increase power to detect effects. But once $n$ is large enough that the sampling noise $1/(n-1)$ is small relative to the crud variance $\sigma_{\mathrm{crud}}^2$, the denominator is approximately $\sigma_{\mathrm{crud}}$ regardless of $n$: the bottleneck is no longer imprecise estimation but the fact that background correlations are themselves nonzero. Additional observations measure the crud more precisely but do not help separate signal from background.
+Because $\sigma_{\mathrm{crud}} \approx 0.02$--$0.14$ across the domains in Table~\ref{tab:crud-scale} (at $K=10$), the crossover occurs at roughly $n \approx 50$--$2{,}500$. Beyond this point, classical $p$-values continue to shrink---explaining why massive studies routinely report ``significant'' but tiny effects---while the crud-aware $p$-value plateaus.
+For this specific purpose, there are sharply diminishing returns to collecting more than a few thousand observations beyond the crossover; this does not apply to the many other reasons a study might collect more data---improving precision on a known effect, supporting subgroup analysis, replicating a published finding, or detecting effects that are themselves much larger than the crud scale.
+Although larger $n$ can in principle support larger $K$, in high-dimensional data $K$ grows slowly relative to $p$ and estimation noise in adjustment accumulates, so $\sigma_K$ shrinks too slowly to close the gap.
+
+\subsection{Calibration of the parametric test}
+\label{si:parametric-calibration}
+
+The Gaussian approximation underlying the parametric $z$-test is only approximate; in datasets where the off-diagonal residual correlation distribution is heavy-tailed, the parametric formula's bias is non-monotonic in $|r|$. We quantify this in Appendix~\ref{app:bridge-lemmas} (Table~\ref{tab:heavy-tail-cal}) for the two most kurtotic of our nine datasets (NHANES, RNASeq). The headline: at the conventional 5\% threshold ($|r|\approx 2\sigma_{\mathrm{crud}}$) the parametric formula is broadly calibrated; below $p_{\mathrm{crud}}\approx 0.01$ it understates true tail mass by orders of magnitude. Read parametric $p$-values literally only at the conventional threshold; for stronger claims, use the full empirical null.
+
+\subsection{Step-by-step usage}
+\label{si:how-to-use}
+
+\begin{center}
+\fbox{\parbox{0.92\textwidth}{
+\textbf{How to use the crud-aware $z$-test.}
+\begin{enumerate}
+\item Obtain the sample correlation $r$ and sample size $n$ from the study.
+\item Look up a domain-appropriate crud scale $\sigma_{\mathrm{crud}}$: use the residual correlation SD from a large reference dataset in your field (Table~\ref{tab:crud-scale} reports values for various domains at $K=10$), or consult published values.
+\item Compute $z_{\mathrm{crud}} = |r|/\sqrt{\sigma_{\mathrm{crud}}^2 + 1/(n-1)}$ and compare to standard normal critical values ($z>1.96$ for two-sided $p<0.05$). Report the crud-aware $p$-value alongside the classical one.
+\end{enumerate}
+We recommend reporting conclusions for a range of plausible $\sigma_{\mathrm{crud}}$ values as a sensitivity analysis.
+When a large reference dataset is available, the full empirical null is preferable, especially for $p_{\mathrm{crud}}<0.01$ where the parametric formula loses calibration in heavy-tailed domains (Appendix~\ref{app:bridge-lemmas}, Table~\ref{tab:heavy-tail-cal}).
+
+\textbf{Choosing the reference $\sigma_{\mathrm{crud}}$.} The test is sensitive to which reference is used, and the natural choice---the same dataset the target study used---is not always available. Three guidelines: (i)~when the source data are accessible, compute $\sigma_{\mathrm{crud}}$ on the same dataset and, where the target study restricts to a sub-population (e.g., a T2D-only cohort within NHANES), compute it on the matching restriction, since sub-populations can have different residual dependence structure. (ii)~When source data are not accessible, use a published $\sigma_{\mathrm{crud}}$ from a same-domain reference dataset of comparable design (Table~\ref{tab:crud-scale}), and report the conclusion across a range of plausible $\sigma_{\mathrm{crud}}$ values. (iii)~Avoid mismatched designs: a case-control reference $\sigma_{\mathrm{crud}}$ for a population-cohort target (or vice versa) gives a misleading multiple, since case-control sampling inflates focal correlations involving the case-defining variable without proportionally inflating the random-pair $\sigma_{\mathrm{crud}}$ that anchors the test (Appendix~\ref{app:scale-bridge}, caveat~(vii)).
+An online calculator implementing this test is at \url{https://koerding.github.io/crud/test.html}.
+}}
+\end{center}
+
+\subsection{Frequentist reading of the bridge lemma}
+\label{si:frequentist}
+
+The formal results in Appendix~\ref{app:bridge-lemmas} can be read in a frequentist way by treating the spectrum and eigenvectors as fixed but unknown properties of the data-generating distribution; the distributional assumptions summarize empirical regularities across domains rather than introduce a Bayesian prior.
+
+\subsection{Base-rate compounding of the impossibility}
+\label{si:base-rate}
+
+The base rate of direct causal edges makes the impossibility of Theorem~\ref{thm:assoc-only} worse in practice. In a gene-expression study measuring $p=20{,}000$ genes, there are roughly $200$~million possible gene pairs, but each gene directly regulates only a handful of others, so the number of direct regulatory edges is on the order of $p$, not $p^2$. More generally, each newly measured variable has a bounded number of direct causes and effects, so the prior probability $\pi$ that a randomly chosen pair shares a direct causal link is $O(1/p)$---vanishingly small in high-dimensional datasets. Sparse causal structure ($\pi \ll 1$) compounds the spectral limitation by collapsing positive predictive value even at moderate signal-to-crud ratios: not only is each per-pair decision noisy, but even ``significant'' pairs are overwhelmingly likely to be noncausal.
+
+\subsection{Worked examples in full}
+\label{si:worked-examples-extended}
+
+The two examples below are illustrative endpoints---a psychometric within-construct pair (designed to load on the same latent trait) and a borderline-significant epidemiological finding---chosen to bracket the magnitude range, not as random draws from the literature.
+
+\paragraph{A large effect that clears the crud scale.} In the HEXACO personality inventory ($p=242$ items, $n=100{,}000$), items within the same personality facet are designed to measure the same underlying trait. The median within-facet correlation is $|r|=0.32$ at $K=0$, and 55\% of within-facet pairs fall in the top 5\% of the empirical null ($11\times$ enrichment over chance). Applying the crud-aware $z$-test with $\sigma_{\mathrm{crud}} = 0.144$ (HEXACO at $K=0$) gives $z_{\mathrm{crud}} = 2.2$ for the median pair, $p_{\mathrm{crud}} = 0.03$. After removing 10~PCs, 29\% of within-facet pairs remain in the top 5\% ($6\times$ enrichment). Known-strong associations clear the empirical null.
+
+\paragraph{A small effect that does not.} In \citet{liu2022}, multivariable models report a nominally significant association between folate and mortality in adults with T2D (folate quartile 1 vs 2 HR 1.17, 95\% CI 1.01--1.37) in an NHANES-derived cohort of adults with type~2 diabetes ($n \approx 8{,}000$). Converting from the reported confidence interval via $z = \log(\mathrm{HR})/\mathrm{SE}(\log\mathrm{HR})$ and $r \approx z/\sqrt{n}$ gives $r \approx 0.02$, giving $p_{\mathrm{classical}} \approx 0.04$. Applying the crud-aware $z$-test with $\sigma_{\mathrm{crud}} = 0.093$ (NHANES at $K=10$) gives $z_{\mathrm{crud}} = 0.24$, $p_{\mathrm{crud}} = 0.81$. Even this barely significant classical result becomes a crud-aware $p$-value of $0.81$: the effect sits squarely in the middle of the empirical null---its magnitude is typical of randomly chosen NHANES variable pairs after the same adjustment. For comparison, known strong biomarker pairs in the same dataset (hemoglobin vs hematocrit, $r=0.91$; ALT vs AST, $r=0.83$) easily clear the crud scale.
+
+Additional worked examples are in Appendix~\ref{app:additional-examples}: NHANES biomarkers (positive---known mechanistic pairs clear the crud scale easily) and GTEx RNA-seq (negative---most reported cis-eQTL effects do not).

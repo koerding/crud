@@ -1,41 +1,13 @@
 \subsection{Bridge lemma: the crud scale and its decay}
 
-The previous sections established that background correlations are wide and that eigenvalue spectra decay slowly. We now formalize the link: how wide should the residual correlation distribution be, given the eigenvalue spectrum? The answer is a simple formula---the ``crud scale'' $\sigma_K$---that predicts the spread of residual correlations from the spectrum alone.
+We formalize the link from the eigenvalue spectrum to the residual correlation distribution. Theorem~\ref{thm:crud-scale} (Appendix~\ref{app:bridge-lemmas}) shows that under a Haar-like delocalization condition on the eigenvectors of the covariance, the SD of the residual correlation $\rho^{(K)}_{ij}$ across uniformly random pairs is well approximated by a ratio of eigenvalue tail sums:
+\begin{equation}\label{eq:sigma-K}
+\sigma_K \;:=\; \frac{\sqrt{\sum_{k>K}\lambda_k^2}}{\sum_{k>K}\lambda_k}.
+\end{equation}
+The numerator measures how unevenly the remaining variance is distributed across components; the denominator sets the scale. Eigenvector delocalization is met only approximately in our datasets ($3.8$--$11.2\times$ the Haar ideal; Appendix~\ref{app:assumption-audit}, Test~2), but the resulting bias is conservative for the crud-scale claim (localization tends to make~\eqref{eq:sigma-K} overestimate the typical residual correlation; SI~\ref{app:approx-robust}).
 
-The key quantity is the width of the background correlation distribution after regressing out $K$ principal components. In matrix notation, regressing each variable on the top $K$ PC scores is equivalent to projecting out the top-$K$ eigenspace of the covariance matrix $\Sigma$; the residual covariance is $\Sigma^{(K)} = (I - P_K)\Sigma(I - P_K)$, where $P_K$ is the projector onto the leading $K$ eigenvectors (details in Appendix~\ref{app:bridge-lemmas}). The residual correlation between features $i$ and $j$ is the corresponding entry of $\Sigma^{(K)}$, normalized to unit diagonal: $\rho^{(K)}_{ij} = \Sigma^{(K)}_{ij}/\sqrt{\Sigma^{(K)}_{ii}\Sigma^{(K)}_{jj}}$.
-
-Appendix~\ref{app:bridge-lemmas} (Theorem~\ref{thm:crud-scale}) shows that for a uniformly random pair $(i,j)$, the standard deviation of $\rho^{(K)}_{ij}$---i.e., how wide the residual correlation distribution is---is well approximated by a ratio of eigenvalue tail sums:
-\[
-\sigma_K := \frac{\sqrt{\sum_{k>K} \lambda_k^2}}{\sum_{k>K} \lambda_k}.
-\]
-Intuitively, the numerator measures how unevenly the remaining variance is distributed across components (the more concentrated it is, the wider the residual correlations), while the denominator measures the total remaining variance (which sets the scale). The result requires that individual PCs spread their influence broadly across features rather than loading on just a few---a condition called ``eigenvector delocalization.'' The empirical audit (Appendix~\ref{app:assumption-audit}, Test~2) finds that this condition is met only approximately: eigenvector coherence is $3.8$--$11.2\times$ the Haar-uniform ideal across our nine datasets, with the largest deviations in low-$p$ data. The resulting bias on this spectrum-only formula is conservative for the crud-scale claim (Section~\ref{app:approx-robust}): localization tends to make the formula overestimate the typical residual correlation, so the qualitative message---that low-rank adjustment shrinks the crud scale only modestly---is not threatened by the partial violation. (The audit also reports heavy-tailed residuals, which bias the Theorem~\ref{thm:assoc-only} error formula in the optimistic direction; we discuss that separately.) The spectral prediction tracks the empirical residual SD across values of $K$ in all nine datasets.
-
-In block-structured settings, $\sigma_K$ should be read as a global crud scale; local or block-specific crud scales may be larger.
-
-If the eigenvalues follow a power law $\lambda_k \approx c k^{-\alpha}$, then $\sigma_K$ decays slowly as $K$ grows (Appendix~\ref{app:bridge-lemmas}, Corollary~\ref{cor:powerlaw}). In the especially relevant $\alpha \approx 1$ case,
-\[
-\sigma_K \approx \frac{1}{\sqrt{K}\log(p/K)}.
-\]
-Thus, even removing $K=10$ components can leave a substantial residual crud scale when $p$ is large. This formalizes the empirical observation that low-rank adjustment often reduces the spread of correlations only modestly.
+If the eigenvalues follow a power law $\lambda_k \approx c k^{-\alpha}$, then $\sigma_K$ decays slowly: in the especially relevant $\alpha \approx 1$ case, $\sigma_K \approx 1/(\sqrt{K}\log(p/K))$ (Corollary~\ref{cor:powerlaw}). Removing $K=10$ components can leave a substantial residual crud scale when $p$ is large, formalizing why low-rank adjustment shrinks the correlation distribution only modestly.
 
 \subsection{Decision-theoretic limit}
 
-The crud scale $\sigma_K$ sets the width of the background correlation distribution. A natural follow-up question is: can we still reliably pick out truly causal pairs from this background? Standard significance testing asks whether an association differs from zero. The relevant question here is different: given that background correlations are not zero but instead drawn from a distribution of width $\sigma_K$, can any statistical rule reliably classify a pair as ``causally linked'' versus ``merely correlated by background dependence''?
-
-The formal results can be read in a frequentist way by treating the spectrum and eigenvectors as fixed but unknown properties of the data-generating distribution; the distributional assumptions summarize empirical regularities across domains rather than introduce a Bayesian prior.
-
-Appendix~\ref{app:bridge-lemmas} (Theorem~\ref{thm:assoc-only}) formalizes this as a signal-detection problem. Consider a random pair $(i,j)$: most pairs have no direct causal edge, and a small fraction have a direct edge that induces a mean shift $\mu$ in the adjusted association statistic $T_{ij}$ (e.g., the adjusted sample correlation). Under the simplest form,
-\[
-H_0\ (\text{no direct edge}):\quad T_{ij} \sim \mathcal{N}(0,\sigma_K^2),
-\]
-\[
-H_1\ (\text{direct edge}):\quad T_{ij} \sim \mathcal{N}(\mu,\sigma_K^2).
-\]
-Then the minimum achievable misclassification error for any decision rule that uses only $T_{ij}$ is
-\[
-\mathrm{error}^* = \Phi\!\left(-\frac{|\mu|}{2\sigma_K}\right),
-\]
-where $\Phi$ is the standard normal CDF. In particular, if $|\mu|$ is at most a constant multiple of $\sigma_K$, the error is bounded below by a constant bounded away from zero, regardless of sample size. This limitation persists as $n\to\infty$ within our model: under the delocalization assumption and fixed $K$, $\sigma_K$ is a population quantity that more samples cannot reduce. Whether this model-level quantity matches the conceptually natural notion of ``background dependence'' in a given domain depends on whether the chosen adjustment captures that domain's confounding structure. Put plainly: if the causal signal (in adjusted-correlation units) is not larger than the crud scale, then no correlation-only rule can reliably separate causal from noncausal pairs.
-If additional structure such as variance changes is also present under $H_1$, identification may become easier or harder depending on the direction of the change; the equal-variance mean-shift case provides the cleanest impossibility benchmark.
-
-The base rate of direct causal edges makes this worse. In a gene expression study measuring $p = 20{,}000$ genes, there are roughly 200 million possible gene pairs, but each gene directly regulates only a handful of others, so the number of direct regulatory edges is on the order of $p$, not $p^2$. More generally, each newly measured variable has a bounded number of direct causes and effects, so the prior probability $\pi$ that a randomly chosen pair shares a direct causal link is $O(1/p)$---vanishingly small in high-dimensional datasets. Sparse causal structure ($\pi \ll 1$) compounds the spectral limitation by collapsing positive predictive value even at moderate signal-to-crud ratios: not only is each per-pair decision noisy, but even ``significant'' pairs are overwhelmingly likely to be noncausal.
+A complementary question: given that background correlations are drawn from a distribution of width $\sigma_K$, can any rule reliably classify a pair as causally linked versus correlated by background dependence? Theorem~\ref{thm:assoc-only} (Appendix~\ref{app:bridge-lemmas}) formalizes this as a signal-detection problem. Under a stylized Gaussian mixture in which a direct causal edge induces a mean shift $\mu$ in the adjusted association statistic $T_{ij}$, the minimum achievable misclassification error for any rule that uses only $T_{ij}$ is $\Phi(-|\mu|/(2\sigma_K))$. If $|\mu|$ is at most a constant multiple of $\sigma_K$, this error is bounded below by a constant independent of sample size. The limitation persists as $n\to\infty$ within our model: under fixed $K$, $\sigma_K$ is a population quantity that more samples cannot reduce. Whether this model-level quantity matches the conceptually natural notion of ``background dependence'' in a given domain depends on whether the chosen adjustment captures that domain's confounding structure (SI~\ref{si:test-details}). Sparse causal structure ($\pi \ll 1$) further compounds the limitation by collapsing positive predictive value (SI~\ref{si:base-rate}). Heavy-tailed residuals, additional variance structure, and selected target pairs are discussed in Appendix~\ref{app:bridge-lemmas} and SI~\ref{si:test-details}.

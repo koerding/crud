@@ -1,0 +1,26 @@
+\section{Datasets and provenance}
+\label{si:datasets}
+
+The nine datasets listed in Section~\ref{sec:datasets-main} were chosen to span dimensionalities, sample sizes, and measurement modalities so that any pattern common to all is unlikely to be an artifact of a single data type.
+
+\paragraph{NHANES.} U.S. National Health and Nutrition Examination Survey \citep{nhanes}. Continuous, ordinal, and binary survey items: clinical biomarkers, demographics, health-behavior responses. $n\approx 30{,}000$, $p=165$.
+
+\paragraph{Precinct-level voting and Census demographics.} 2016 U.S. precinct-level voting returns merged with Census American Community Survey demographics \citep{hill2019}. Continuous demographic and political variables. $n\approx 29{,}000$, $p=83$.
+
+\paragraph{GTEx v8 RNA-seq.} Bulk gene-expression measurements from human skeletal muscle samples in the Genotype-Tissue Expression atlas \citep{gtex2020}. Top $p=803$ genes by variance, $n\approx 10{,}000$ samples after subsampling.
+
+\paragraph{Allen Institute mouse brain RNA-seq.} Single-cell expression from mouse cortex \citep{tasic2018}. $p=387$ genes, $n\approx 10{,}000$ cells.
+
+\paragraph{HEXACO.} Personality-inventory item-level responses from a public dataset \citep{ashton2004}. $p=242$ items, $n\approx 23{,}000$ respondents.
+
+\paragraph{CIFAR-10.} Small color natural images \citep{krizhevsky2009}. Pixel intensities, $p=3{,}072$, $n=30{,}000$.
+
+\paragraph{Kay fMRI.} Voxelwise BOLD responses to natural images in human visual cortex \citep{kay2008}. $p=1{,}870$ voxels, $n\approx 8{,}400$ trials.
+
+\paragraph{Haxby fMRI.} Voxelwise BOLD responses to object categories in ventral temporal cortex \citep{haxby2001}. $p=1{,}452$ voxels, $n\approx 24{,}000$ trials.
+
+\paragraph{Stringer mouse V1.} Two-photon imaging of mouse primary visual cortex \citep{stringer2019}. $p=6{,}000$ neurons, $n\approx 7{,}000$ time points.
+
+\paragraph{Convenience sampling.} The nine were chosen for size, public availability, and modality coverage. They are not a probability sample of empirical sciences. Patterns common to all are evidence that the phenomenon is not data-modality-specific, but generalization to fields and datasets we did not analyze is an empirical question that nine cases cannot resolve.
+
+\paragraph{Counterexamples we did not observe.} A counterexample to the headline empirical finding would be a domain where a realistic adjustment used by practitioners collapses the residual correlation distribution, implying a rapidly decaying $\sigma_K$. Across the adjustment methods we tested---PC regression and Lasso (Appendix~\ref{app:alt-adjust})---neither collapsed the residual distribution on any of the nine datasets; whether some practitioner-favored adjustment in another domain would do so is not addressed by our experiments.

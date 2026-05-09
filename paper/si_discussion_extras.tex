@@ -1,0 +1,22 @@
+\section{Discussion: extended caveats and stakes}
+\label{si:discussion-extras}
+
+\subsection{Smoking--lung-cancer: structural-ceiling derivation and case-control vs cohort}
+\label{si:smoking-detail}
+
+Smoking and lung cancer are often cited as the canonical example of a strong, well-established epidemiological causal link. Pooled multiple-adjusted relative risks are about 7 in large cohort meta-analyses \citep{okeeffe2018}. Converting via Equation~\eqref{eq:rr-to-r} at representative population prevalences ($p_X=0.20$ for smoking prevalence, $p_Y=0.06$ for lifetime lung-cancer incidence) gives $r\approx 0.28$, roughly $3\,\sigma_K$ against the NHANES residual scale at $K=10$ ($\sigma_K=0.093$): the smoking--lung-cancer association clears the conventional crud-aware threshold but is, in correlation units, much smaller than the relative-risk scale alone would suggest.
+
+This is in fact close to the structural ceiling on binary correlations at this outcome prevalence:
+\begin{equation}
+\phi_{\max} = \sqrt{\frac{p_Y(1-p_X)}{p_X(1-p_Y)}} \approx 0.51 \quad \text{here, regardless of RR.}
+\end{equation}
+Even an arbitrarily large causal effect on a rare binary outcome cannot produce a much larger population correlation in a cohort design. So smoking-cancer at $r\approx 0.28$ is over half the structural maximum, and the test correctly identifies it as exceptional given that ceiling.
+
+Case-control summaries of the same data routinely report $r\approx 0.7$. That figure is a property of the 1:1 case-control sampling design (which artificially sets $p_Y=0.5$), not of the population correlation, and is not the right comparison to a population-cohort $\sigma_K$ such as NHANES (Appendix~\ref{app:scale-bridge}, caveat (vii)). The $\sigma_K$-multiple is design-internal: case-control sampling inflates focal correlations involving the case-defining variable but leaves correlations among other variable pairs (which dominate $\sigma_K$) roughly unchanged, so the same underlying causal relationship can read as $\sim 3\sigma_K$ in cohort units and $\sim 7\sigma_K$ in case-control units.
+
+A second example from a different domain illustrates the upper end without any binary-correlation ceiling: in the HEXACO literature, Dark Triad traits are strongly negatively correlated with Honesty-Humility ($r$s $= -0.72, -0.57, -0.53$); even the smallest of these, $|r|=0.53$, is roughly $3.7\,\sigma_K$ at $K=0$ in HEXACO ($\sigma_0=0.144$; Table~\ref{tab:crud-scale}) \citep{lee2005}. These two textbook examples are illustrative endpoints, chosen to anchor the high end of the magnitude scale, not representative of the typical published effect.
+
+\subsection{Practical stakes: asymmetric costs of skepticism}
+\label{si:practical-stakes}
+
+The cost of treating small-effect causal claims skeptically depends on the downstream decisions they inform. Several of those decisions are themselves of modest causal consequence: a regression-discontinuity analysis of NIH R01 funding estimates that receipt of a marginal grant causes fewer than one additional publication over the following five years, with citation effects not statistically distinguishable from zero \citep{jacob2011}. The implication is an asymmetry---raising the bar for small-effect causal claims is unlikely to forgo large substantive gains, because the decisions such claims inform often have only small effects on the outcomes they are meant to improve.

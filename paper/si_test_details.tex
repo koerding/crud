@@ -58,6 +58,35 @@ The formal results in Appendix~\ref{app:bridge-lemmas} can be read in a frequent
 
 The base rate of direct causal edges makes the impossibility of Theorem~\ref{thm:assoc-only} worse in practice. In a gene-expression study measuring $p=20{,}000$ genes, there are roughly $200$~million possible gene pairs, but each gene directly regulates only a handful of others, so the number of direct regulatory edges is on the order of $p$, not $p^2$. More generally, each newly measured variable has a bounded number of direct causes and effects, so the prior probability $\pi$ that a randomly chosen pair shares a direct causal link is $O(1/p)$---vanishingly small in high-dimensional datasets. Sparse causal structure ($\pi \ll 1$) compounds the spectral limitation by collapsing positive predictive value even at moderate signal-to-crud ratios: not only is each per-pair decision noisy, but even ``significant'' pairs are overwhelmingly likely to be noncausal.
 
+\subsection{Reference catalog: choosing \texorpdfstring{$\sigma_K$}{sigma\_K} for an applied study}
+\label{si:reference-catalog}
+
+When the source data underlying a target study are not accessible, the user must select a $\sigma_K$ from a published reference. Table~\ref{tab:reference-catalog} maps common application domains to the closest reference dataset among the nine in this paper at $K=10$, with caveats. The mapping is approximate: the right comparison would use a same-pipeline same-population $\sigma_K$, and the table is meant as a starting point, not a substitute for sensitivity analysis across plausible values.
+
+\begin{table}[h]
+\centering
+\caption{Approximate $\sigma_K$ at $K=10$ for common application domains, paired with the closest reference dataset among the nine in this paper. Caveats: this is a rough domain-similarity match, not a same-pipeline calibration; for any specific study the right $\sigma_K$ is computed on the same data (or a matched sub-population) where possible. We recommend reporting conclusions across a range of plausible $\sigma_K$ values, especially when the closest reference is itself a rough match.}
+\label{tab:reference-catalog}
+\begin{tabular}{lll}
+\toprule
+Application domain & Closest reference & $\sigma_K$ at $K=10$ \\
+\midrule
+Observational epidemiology / health-survey  & NHANES        & $0.093$ \\
+Nutritional epidemiology / cancer registries  & NHANES        & $0.093$ \\
+Bulk gene expression / cis-eQTL (tissue)      & GTEx          & $0.090$ \\
+Single-cell or cell-type expression           & Allen RNA-Seq & $0.071$ \\
+Brain-wide association studies (fMRI)         & Haxby fMRI    & $0.077$ \\
+Visual-cortex voxel responses                 & Kay fMRI      & $0.035$ \\
+Single-neuron / population-coding             & Stringer V1   & $0.021$ \\
+Personality / individual differences          & HEXACO        & $0.046$ \\
+Natural images / pixel-level                  & CIFAR-10      & $0.105$ \\
+Political / Census / area-level demographics  & Precinct      & $0.136$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+A user whose application falls outside this list should pick the closest match by data modality and dimensional regime ($p$ relative to $n$) and report sensitivity to a range of $\sigma_K$ values that brackets neighboring entries. The catalog is a starting point; building a domain-matched empirical null on the same dataset is preferable whenever feasible.
+
 \subsection{Worked examples in full}
 \label{si:worked-examples-extended}
 

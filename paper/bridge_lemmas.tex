@@ -94,13 +94,15 @@ Then the marginal distribution of the sample correlation under the crud null is 
 \end{theorem}
 
 \begin{proof}
-Write $\hat\rho = \rho_{IJ} + \varepsilon$.  By assumption, $\rho_{IJ}\sim\mathcal{N}(0,\sigma_{\mathrm{crud}}^2)$ and $\varepsilon\mathrel{\dot{\sim}}\mathcal{N}(0, 1/(n-1))$. Under the approximation in~\eqref{eq:sample-corr-approx} with $\sigma_n^2\approx 1/(n-1)$, the conditional variance of the sampling noise does not depend on $\rho_{IJ}$, allowing us to treat them as independent.
-The sum of two independent Gaussians is Gaussian, and their variances add:
-\begin{equation}
-\Var(\hat\rho) \approx \Var(\rho_{IJ}) + \Var(\varepsilon) \approx \sigma_{\mathrm{crud}}^2 + \frac{1}{n-1}.
+Write $\hat\rho = \rho_{IJ} + \varepsilon$. The unconditional variance is, exactly,
+\begin{equation}\label{eq:exact-uncond-var}
+\Var(\hat\rho) \;=\; \Var(\rho_{IJ}) \;+\; \E[\Var(\varepsilon\mid\rho_{IJ})] \;=\; \sigma_{\mathrm{crud}}^2 \;+\; \frac{\E[(1-\rho_{IJ}^2)^2]}{n-1},
 \end{equation}
-Both components have zero mean, so $\E[\hat\rho]=0$, yielding the approximate distribution in~\eqref{eq:marginal-crud}.
+using Fisher's variance $\Var(\hat\rho\mid\rho_{IJ})\approx (1-\rho_{IJ}^2)^2/(n-1)$ and the law of total variance. The small-$\rho$ approximation $\E[(1-\rho_{IJ}^2)^2]\approx 1$ gives the simpler form $\Var(\hat\rho)\approx \sigma_{\mathrm{crud}}^2 + 1/(n-1)$. The correction is small in our domains (\ref{rem:fisher-correction} below). Both components have zero mean, so $\E[\hat\rho]=0$, yielding the approximate distribution in~\eqref{eq:marginal-crud}.
 \end{proof}
+
+\paragraph{Remark (size of the Fisher-variance correction).}\label{rem:fisher-correction}
+For $\rho_{IJ}\sim\mathcal{N}(0,\sigma_{\mathrm{crud}}^2)$, $\E[(1-\rho^2)^2]=1-2\sigma_{\mathrm{crud}}^2+3\sigma_{\mathrm{crud}}^4$; for heavier-tailed $\rho$ with excess kurtosis $\kappa$, $\E[(1-\rho^2)^2]=1-2\sigma_{\mathrm{crud}}^2+(\kappa+3)\sigma_{\mathrm{crud}}^4$. Across our nine datasets at $K=10$, this evaluates to $0.967$--$0.999$ (the largest correction is Precinct, where $\sigma_{\mathrm{crud}}^2\approx 0.018$ and $\kappa\approx 8.9$ give $\E[(1-\rho^2)^2]\approx 0.967$, a $3.3\%$ reduction in the sampling-variance term; for NHANES the correction is $1.5\%$). The simplified formula $\sigma_{\mathrm{crud}}^2+1/(n-1)$ thus overestimates the true variance by at most a few percent in any of our domains, so the parametric SD is at most a couple of percent too large and the parametric $z$ correspondingly slightly too small (i.e., parametric $p_{\mathrm{crud}}$ is mildly conservative due to this term alone). This Fisher-variance correction is independent of, and much smaller than, the heavy-tail miscalibration in Table~\ref{tab:heavy-tail-cal}: the latter spans factors of $8$--$270$ at $|r|\geq 3\sigma_{\mathrm{crud}}$ in NHANES and RNA-Seq. The two biases also act in different parts of the magnitude range---the Fisher correction is uniform in $|r|$, while the heavy-tail miscalibration changes sign around $|r|\approx 2\sigma_{\mathrm{crud}}$ (parametric is conservative below the crossover and anti-conservative above it). The dominant source of parametric-formula error in heavy-tailed domains is therefore the Gaussian-tail assumption, not the Fisher-variance approximation; both are substantially absorbed by using the full empirical null in the deep tail.
 
 \paragraph{The crud-aware $z$-test.}
 Theorem~\ref{thm:parametric-crud} yields a direct test statistic. For an observed correlation $r$ with sample size $n$ and domain crud level $\sigma_{\mathrm{crud}}$, define

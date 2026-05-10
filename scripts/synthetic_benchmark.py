@@ -127,6 +127,25 @@ def bh_fdr(pvalues, q):
     return pvalues <= threshold
 
 
+def efron_empirical_null(zvals):
+    """Efron-style empirical null. Estimate (mu0, sigma0) robustly so the
+    fit is not pulled by heavy tails / non-null signal:
+        mu0 = median(z)
+        sigma0 = IQR(z) / 1.349   (robust SD; 1.349 is the IQR-to-SD factor
+                                    for a Gaussian)
+    Then return the recalibrated two-sided p-values under N(mu0, sigma0).
+    This captures Efron's central-matching idea: the bulk of z is mostly
+    null, and the IQR of the bulk gives a scale that resists outliers.
+    """
+    mu0 = float(np.median(zvals))
+    q25, q75 = np.percentile(zvals, [25, 75])
+    iqr = float(q75 - q25)
+    sigma0 = iqr / 1.349
+    z_recal = (zvals - mu0) / sigma0
+    p_recal = 2 * norm.sf(np.abs(z_recal))
+    return p_recal, mu0, sigma0
+
+
 def main():
     X, truth, edge_list = generate_data()
     print(f"DGP: p={P}, n={N}, L={L} latent factors, E={E} direct edges")
@@ -154,10 +173,15 @@ def main():
     bonf_thresh = norm.ppf(1 - ALPHA / (2 * M)) / np.sqrt(N - 1)
     flagged_bonf = np.abs(r_full) > bonf_thresh
 
-    # 3. BH-FDR at q = 0.05
-    z_classical = np.abs(r_full) * np.sqrt(N - 1)
-    p_classical = 2 * norm.sf(z_classical)
+    # 3. BH-FDR at q = 0.05 against the theoretical N(0,1) null
+    z_classical = r_full * np.sqrt(N - 1)
+    p_classical = 2 * norm.sf(np.abs(z_classical))
     flagged_bh = bh_fdr(p_classical, q=ALPHA)
+
+    # 3b. Efron empirical-null + BH-FDR
+    p_efron, mu0, sigma0 = efron_empirical_null(z_classical)
+    flagged_efron_bh = bh_fdr(p_efron, q=ALPHA)
+    print(f"Efron empirical null: mu0={mu0:.3f}, sigma0={sigma0:.3f}")
 
     # 4. Crud-aware empirical at K=10, 95th percentile
     sigma_K = float(r_resid.std(ddof=0))
@@ -175,12 +199,13 @@ def main():
     flagged_crud_raw95 = np.abs(r_full) > raw95
 
     methods = [
-        ("Classical $|r|>1.96/\\sqrt{n-1}$",       flagged_classical),
+        ("Classical $|r|>1.96/\\sqrt{n-1}$",        flagged_classical),
         ("Bonferroni",                              flagged_bonf),
-        (f"BH-FDR at $q={ALPHA}$",                  flagged_bh),
-        (f"Crud-aware, 95th pct (K=0)",            flagged_crud_raw95),
-        (f"Crud-aware, 95th pct (K={K_ADJUST})",   flagged_crud95),
-        (f"Crud-aware, 99th pct (K={K_ADJUST})",   flagged_crud99),
+        (f"BH-FDR (theoretical null, $q={ALPHA}$)", flagged_bh),
+        (f"Efron empirical null + BH ($q={ALPHA}$)",flagged_efron_bh),
+        (f"Crud-aware, 95th pct (K=0)",             flagged_crud_raw95),
+        (f"Crud-aware, 95th pct (K={K_ADJUST})",    flagged_crud95),
+        (f"Crud-aware, 99th pct (K={K_ADJUST})",    flagged_crud99),
     ]
 
     print(f"\n{'Method':<35} {'Flagged':>8} {'TP':>5} {'FP':>5} "

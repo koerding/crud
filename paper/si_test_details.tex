@@ -76,36 +76,39 @@ This produces a covariance matrix with broad latent-factor confounding among all
 \item Classical: $|r| > z_{0.025}/\sqrt{n-1}$.
 \item Bonferroni: classical at $\alpha/M$, $M=p(p-1)/2$.
 \item BH-FDR at $q=0.05$ against the theoretical $\mathcal{N}(0,1)$ null.
+\item BY-FDR (Benjamini--Yekutieli, dependence-aware) at $q=0.05$: BH applied at the adjusted level $q'=q/\sum_{i=1}^M 1/i$, which is valid under arbitrary dependence among test statistics.
 \item Efron empirical null \citep{efron2004} + BH-FDR at $q=0.05$. The empirical null is fitted by robust central matching: $\mu_0=\mathrm{median}(z)$, $\sigma_0=\mathrm{IQR}(z)/1.349$. P-values are recalibrated under $\mathcal{N}(\mu_0,\sigma_0^2)$ before BH.
 \item Crud-aware empirical at $K=0$, 95th percentile of $|r|$.
 \item Crud-aware empirical at $K=10$, 95th percentile of $|r_{\mathrm{resid}}|$.
 \item Crud-aware empirical at $K=10$, 99th percentile of $|r_{\mathrm{resid}}|$.
 \end{enumerate}
 
-\paragraph{Results.} Table~\ref{tab:synthetic-benchmark} reports flagged count, true positives, false positives, precision, recall, and F1 for one run (seed fixed for reproducibility; reproducer in \texttt{scripts/synthetic\_benchmark.py}).
+\paragraph{Results.} Table~\ref{tab:synthetic-benchmark} reports flagged count, true positives, false positives, precision, recall, and F1, averaged across $50$ random seeds with Monte Carlo standard errors (reproducer: \texttt{scripts/synthetic\_benchmark.py}).
 
 \begin{table}[h]
 \centering
-\caption{Method comparison on the synthetic DGP. Truth: $E=50$ direct edges out of $M=19{,}900$ off-diagonal pairs (prior $P(\mathrm{edge})=0.0025$). Empirical $\sigma_0=0.066$; $\sigma_{K=10}=0.029$.}
+\small
+\caption{Method comparison on the synthetic DGP. Truth: $E=50$ direct edges out of $M=19{,}900$ off-diagonal pairs (prior $P(\mathrm{edge})=0.0025$). Mean $\pm$ Monte Carlo SE across $50$ seeds. Mean $\sigma_K(K=0)=0.062$, $\sigma_K(K=10)=0.029$.}
 \label{tab:synthetic-benchmark}
 \begin{tabular}{lcccccc}
 \toprule
 Method & Flagged & TP & FP & Precision & Recall & F1 \\
 \midrule
-Classical $|r|>1.96/\sqrt{n-1}$       & $4{,}478$ & $48$ & $4{,}430$ & $0.011$ & $0.96$ & $0.02$ \\
-Bonferroni ($\alpha/M$)               & $1{,}851$ & $32$ & $1{,}819$ & $0.017$ & $0.64$ & $0.03$ \\
-BH-FDR (theoretical null, $q=0.05$)   & $3{,}277$ & $48$ & $3{,}229$ & $0.015$ & $0.96$ & $0.03$ \\
-Efron empirical null + BH ($q=0.05$)  & $2{,}412$ & $43$ & $2{,}369$ & $0.018$ & $0.86$ & $0.04$ \\
-Crud-aware, 95th pct, $K=0$           & $\phantom{0}995$ & $\phantom{0}9$ & $\phantom{0}986$ & $0.009$ & $0.18$ & $0.02$ \\
-Crud-aware, 95th pct, $K=10$          & $\phantom{0}995$ & $48$ & $\phantom{0}947$ & $0.048$ & $0.96$ & $0.09$ \\
-Crud-aware, 99th pct, $K=10$          & $\phantom{0}199$ & $40$ & $\phantom{0}159$ & $0.20$  & $0.80$ & $0.32$ \\
+Classical $|r|>1.96/\sqrt{n-1}$       & $4244\pm 26$ & $47$ & $4197\pm 26$ & $0.011$ & $0.94$ & $0.022$ \\
+Bonferroni ($\alpha/M$)               & $1608\pm 21$ & $28$ & $1580\pm 21$ & $0.017$ & $0.55$ & $0.034$ \\
+BH-FDR (theoretical null, $q=0.05$)   & $2988\pm 29$ & $45$ & $2942\pm 29$ & $0.015$ & $0.91$ & $0.030$ \\
+BY-FDR (dependent BH, $q=0.05$)       & $2318\pm 26$ & $41$ & $2276\pm 26$ & $0.018$ & $0.83$ & $0.035$ \\
+Efron empirical null + BH ($q=0.05$)  & $2160\pm 22$ & $39$ & $2121\pm 22$ & $0.018$ & $0.79$ & $0.036$ \\
+Crud-aware, 95th pct, $K=0$           & $\phantom{0}995$ & $\phantom{0}9$ & $\phantom{0}986$ & $0.009$ & $0.19$ & $0.018$ \\
+Crud-aware, 95th pct, $K=10$          & $\phantom{0}995$ & $49$ & $\phantom{0}946$ & $0.049$ & $0.98$ & $0.094$ \\
+Crud-aware, 99th pct, $K=10$          & $\phantom{0}199$ & $45$ & $\phantom{0}154$ & $0.226$ & $0.90$ & $0.361$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \paragraph{Interpretation.} Three findings.
 
-(i) \emph{Classical multiple-testing methods fail to control false discoveries when confounding is structural.} BH-FDR against the theoretical $\mathcal{N}(0,1)$ null is supposed to control the false discovery rate at $q=0.05$, but here it returns $3{,}229$ false discoveries against $48$ true ones (FDR $\approx 0.985$, far above $0.05$). The reason is well-known: BH assumes the $p$-values under the null are independent or weakly dependent, which fails badly under shared latent factors. Bonferroni is more conservative on flagged count but still recovers more false positives than true ones. Efron's empirical null \citep{efron2004} addresses part of this by widening the null distribution ($\sigma_0=1.35$ in this run, vs.\ the theoretical $\sigma_0=1$), which reduces flagged count modestly ($2{,}412$ vs.\ $3{,}277$) and yields slightly better F1, but it still fails to control FDR because the empirical null only recalibrates the marginal scale, not the structure that makes background pairs correlated. Efron's empirical null is the closest standard competitor to the crud-aware approach; it is improved upon by orders of magnitude when the structural confounding is removed via PC adjustment.
+(i) \emph{Classical multiple-testing methods fail to control false discoveries when confounding is structural.} BH-FDR against the theoretical $\mathcal{N}(0,1)$ null is supposed to control the false discovery rate at $q=0.05$, but in our DGP it returns $\sim$$2942$ false discoveries against $45$ true ones (FDR $\approx 0.985$, far above $0.05$, across all $50$ seeds). The reason is well-known: BH assumes the $p$-values under the null are independent or weakly dependent, which fails badly under shared latent factors. Bonferroni is more conservative on flagged count but still has FDR above $0.98$. The dependence-aware BY-FDR procedure controls FDR under arbitrary dependence at the cost of an $\sum 1/i\approx \log M$ factor, which makes it more conservative ($\sim$$2276$ false discoveries) but still well above the nominal level for this DGP. Efron's empirical null \citep{efron2004} widens the null ($\sigma_0\approx 1.33$ vs.\ the theoretical $\sigma_0=1$) and reduces flagged count modestly to $\sim$$2160$, with FDR $\approx 0.98$. None of these methods controls FDR in the regime our paper documents; Efron's empirical null is the closest standard competitor, and it is improved upon by an order of magnitude in F1 when the structural confounding is removed via PC adjustment.
 
 (ii) \emph{Crud-aware testing without PC adjustment ($K=0$) does not help.} At $K=0$ the empirical null is dominated by latent-factor correlations of similar magnitude to direct-edge correlations, so the rank diagnostic flags many background pairs as ``distinctive'' and misses many direct edges. The PC adjustment is essential: removing the top $K=10$ PCs shrinks $\sigma_K$ from $0.066$ to $0.029$, and direct edges then dominate the upper tail of the residual correlation distribution.
 

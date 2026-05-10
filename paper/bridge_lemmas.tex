@@ -101,8 +101,13 @@ Write $\hat\rho = \rho_{IJ} + \varepsilon$. The unconditional variance is, exact
 using Fisher's variance $\Var(\hat\rho\mid\rho_{IJ})\approx (1-\rho_{IJ}^2)^2/(n-1)$ and the law of total variance. The small-$\rho$ approximation $\E[(1-\rho_{IJ}^2)^2]\approx 1$ gives the simpler form $\Var(\hat\rho)\approx \sigma_{\mathrm{crud}}^2 + 1/(n-1)$. The correction is small in our domains (\ref{rem:fisher-correction} below). Both components have zero mean, so $\E[\hat\rho]=0$, yielding the approximate distribution in~\eqref{eq:marginal-crud}.
 \end{proof}
 
+\paragraph{Remark (empirical-Bayes interpretation).}\label{rem:eb-interpretation}
+The denominator $\sqrt{\sigma_{\mathrm{crud}}^2 + 1/(n-1)}$ in Eq.~\eqref{eq:z-crud} is the \emph{marginal} SD of $\hat\rho$ under the prior $\rho_{IJ}\sim\mathcal{N}(0,\sigma_{\mathrm{crud}}^2)$, not the conditional sampling SD of $\hat\rho_{ij}$ given $\rho_{ij}=0$ for a fixed pair. The parametric crud-aware $z$-test is therefore best read as an empirical-Bayes / marginal-likelihood statement: $p_{\mathrm{crud}}$ is the marginal tail probability that a randomly drawn pair from the domain (with $\rho$ drawn from the empirical-Bayes prior $\mathcal{N}(0,\sigma_{\mathrm{crud}}^2)$) would yield $|\hat\rho|\ge|r|$. Under the sharp null $\rho_{ij}=0$ for a specific fixed pair, the conditional sampling variance is just $1/(n-1)$, and $p_{\mathrm{crud}}$ is \emph{not} a frequentist $p$-value for that null. Both readings give the same procedure but answer different questions: the empirical-Bayes reading asks ``is this magnitude typical of pairs drawn from the same domain,'' while the frequentist reading would ask ``is the underlying $\rho$ exactly zero.'' The empirical version (Section~\ref{app:crud-aware-pvalues}) is the same statistical object: a marginal magnitude rank against same-pipeline reference pairs. Both are calibrated for the magnitude question, neither for the sharp-null one.
+
 \paragraph{Remark (size of the Fisher-variance correction).}\label{rem:fisher-correction}
 For $\rho_{IJ}\sim\mathcal{N}(0,\sigma_{\mathrm{crud}}^2)$, $\E[(1-\rho^2)^2]=1-2\sigma_{\mathrm{crud}}^2+3\sigma_{\mathrm{crud}}^4$; for heavier-tailed $\rho$ with excess kurtosis $\kappa$, $\E[(1-\rho^2)^2]=1-2\sigma_{\mathrm{crud}}^2+(\kappa+3)\sigma_{\mathrm{crud}}^4$. Across our nine datasets at $K=10$, this evaluates to $0.967$--$0.999$ (the largest correction is Precinct, where $\sigma_{\mathrm{crud}}^2\approx 0.018$ and $\kappa\approx 8.9$ give $\E[(1-\rho^2)^2]\approx 0.967$, a $3.3\%$ reduction in the sampling-variance term; for NHANES the correction is $1.5\%$). The simplified formula $\sigma_{\mathrm{crud}}^2+1/(n-1)$ thus overestimates the true variance by at most a few percent in any of our domains, so the parametric SD is at most a couple of percent too large and the parametric $z$ correspondingly slightly too small (i.e., parametric $p_{\mathrm{crud}}$ is mildly conservative due to this term alone). This Fisher-variance correction is independent of, and much smaller than, the heavy-tail miscalibration in Table~\ref{tab:heavy-tail-cal}: the latter spans factors of $8$--$270$ at $|r|\geq 3\sigma_{\mathrm{crud}}$ in NHANES and RNA-Seq. The two biases also act in different parts of the magnitude range---the Fisher correction is uniform in $|r|$, while the heavy-tail miscalibration changes sign around $|r|\approx 2\sigma_{\mathrm{crud}}$ (parametric is conservative below the crossover and anti-conservative above it). The dominant source of parametric-formula error in heavy-tailed domains is therefore the Gaussian-tail assumption, not the Fisher-variance approximation; both are substantially absorbed by using the full empirical null in the deep tail.
+
+A separate concern: Fisher's variance formula $(1-\rho_{ij}^2)^2/(n-1)$ assumes bivariate-normal sampling. With non-Gaussian marginals---e.g., the heavy-kurtosis NHANES data documented in audit Test~5 ($\kappa\approx 35.6$ at $K=10$)---the actual conditional variance $\Var(\hat\rho_{ij}\mid\rho_{ij})$ can differ from Fisher's formula by a factor that depends on the marginal kurtosis of $X_i$ and $X_j$ themselves. This is a different bias from both the $\E[(1-\rho^2)^2]$ correction above and the heavy-tailed distribution of $\rho_{IJ}$ across pairs. Empirically, the parametric vs.\ empirical comparison in Table~\ref{tab:heavy-tail-cal} bundles all of these biases together: the table is what an applied user actually observes, and it is the right object to consult for calibration in a given dataset.
 
 \paragraph{The crud-aware $z$-test.}
 Theorem~\ref{thm:parametric-crud} yields a direct test statistic. For an observed correlation $r$ with sample size $n$ and domain crud level $\sigma_{\mathrm{crud}}$, define
@@ -208,20 +213,20 @@ not concentrated on small sets of coordinates.
 
 \begin{assumption}[Haar-like eigenvectors / delocalization]\label{ass:haar}
 The eigenvector matrix $V$ is distributed as a Haar-uniform random orthogonal matrix, independent of
-$\Lambda$, or (more generally) satisfies the moment bounds of Haar orthogonal matrices:
-for all $i\neq j$ and all $k$,
+$\Lambda$, or (more generally) satisfies the following Haar-Weingarten moment identities. \emph{Second-order moments}: for all $i\neq j$ and all $k$,
 \begin{equation}
 \E[v_{ik}]=0,\qquad \E[v_{ik}^2]=\frac{1}{p},\qquad
 \E[v_{ik}^2v_{jk}^2]=\frac{1}{p(p+2)}.
 \end{equation}
-Additionally, cross-component correlations are negligible in the sense that the covariance of
-$v_{ik}v_{jk}$ and $v_{i\ell}v_{j\ell}$ for $k\neq \ell$ contributes only lower-order terms
-($O(p^{-3})$) to the variance calculations below.
+\emph{Fourth-order moments and cross-component bounds} (which the proof below uses): for $k\neq\ell$ and $i\neq j$,
+\begin{equation}\label{eq:weingarten-4}
+\Cov\!\bigl(v_{ik}v_{jk},\,v_{i\ell}v_{j\ell}\bigr) \;=\; O(p^{-3}),
+\end{equation}
+which holds for genuinely Haar $V$ via the fourth-order Weingarten calculus and is assumed here as part of the delocalization condition.
 \end{assumption}
 
 Assumption~\ref{ass:haar} is standard in random matrix theory as a proxy for ``incoherent'' or
-``delocalized'' eigenvectors. Empirically, it is supported when no small subset of variables dominates
-principal components.
+``delocalized'' eigenvectors. Both clauses---the second-order moments and the fourth-order Weingarten identity in~\eqref{eq:weingarten-4}---are required by the proof of Theorem~\ref{thm:crud-scale}; we state both explicitly so that the assumption is closed under the moment bounds the proof actually invokes. The empirical analog of the cross-component bound is checked in audit Test~6 (Appendix~\ref{app:assumption-audit}, Table~\ref{tab:crosscomp}), which reports mean cross-correlations $|\bar r|<0.07$ across all nine datasets, consistent with the $O(p^{-3})$ assumption in the mean.
 
 \paragraph{Remark (localized crud).}
 If eigenvectors are partially localized or block-structured, the same calculations imply that crud may be

@@ -8,7 +8,7 @@ We analyze nine large datasets spanning neuroscience, genomics, psychology, poli
 \begin{figure}[ht]
 \centering
 \includegraphics[width=0.4\textwidth]{figures/fig1_datasets.pdf}
-\caption{Nine large datasets used to study correlational structure across modern science domains.}
+\caption{\textbf{Nine large public datasets span a wide range of sample sizes, dimensionalities, and measurement modalities.} Bars show analysis sample size $n$ per dataset on a log scale; see Table~\ref{tab:crud-scale} for $p$ and SI Appendix~\ref{si:datasets} for provenance.}
 \label{fig:datasets}
 \end{figure}
 
@@ -21,7 +21,7 @@ For uniformly sampled feature pairs, we observe a broad spread of correlations (
 \includegraphics[width=0.48\textwidth]{figures/fig2_left.pdf}%
 \hfill
 \includegraphics[width=0.48\textwidth]{figures/fig2_right.pdf}
-\caption{\textbf{Broad distributions of correlations persist after generic low-rank adjustment.} Left: distribution of pairwise correlations across uniformly sampled feature pairs before adjustment ($K=0$). Right: the same distribution after regressing each feature on the top $K=10$ principal component scores. Dotted vertical lines mark the classical two-sided significance threshold ($p < 0.05$) for each dataset's full sample size; nearly the entire empirical null exceeds this threshold.}
+\caption{\textbf{Broad distributions of correlations persist after generic low-rank adjustment.} Each curve shows the density of pairwise correlations across uniformly sampled feature pairs in one dataset (color legend in panel). Left: before adjustment ($K=0$). Right: after regressing each feature on the top $K=10$ principal component scores. Dotted vertical lines mark the classical two-sided $p<0.05$ threshold for each dataset's full $n$; nearly the entire empirical null exceeds this threshold, so ``significant'' does not mean ``distinctive.''}
 \label{fig:corr-dist}
 \end{figure}
 
@@ -58,6 +58,6 @@ Why does removing broad shared variation not shrink the correlation distribution
 \begin{figure}[ht]
 \centering
 \includegraphics[width=0.7\textwidth]{figures/fig3_spectra.pdf}
-\caption{\textbf{Explained-variance spectra are approximately power-law.} Each point shows the variance a given PC explains (logarithmic axes). A straight line means a power law: variance decays as $k^{-\alpha}$. When $\alpha$ is near 1, variance spreads broadly across components, so removing the first few PCs leaves most of the shared dependence intact.}
+\caption{\textbf{Explained-variance spectra are approximately power-law across all nine datasets.} Curves show the fraction of variance explained by each principal component on log--log axes; fitted exponents $\alpha\in[0.55,1.33]$ (shown in panel legend along with $R^2$ of the power-law fit). A straight line on these axes means a power law $k^{-\alpha}$; when $\alpha$ is near $1$, variance is spread broadly across components, so removing the first few PCs leaves most of the shared dependence intact. The ``$1/f$ reference'' line is shown for comparison.}
 \label{fig:spectra}
 \end{figure}

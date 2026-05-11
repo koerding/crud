@@ -173,13 +173,24 @@ def run_one_seed(seed):
     crud95_raw = np.percentile(np.abs(r_full), 95)
     flagged_crud_raw = np.abs(r_full) > crud95_raw
 
-    crud95 = np.percentile(np.abs(r_resid), 95)
-    crud99 = np.percentile(np.abs(r_resid), 99)
-    flagged_crud95 = np.abs(r_resid) > crud95
-    flagged_crud99 = np.abs(r_resid) > crud99
+    # Crud-aware at multiple K values to show K-mismatch behavior.
+    # DGP has L=10 latent factors; K=5 is under-adjusted, K=10 matched, K=15/20 over-adjusted.
+    crud_results_by_K = {}
+    sigmas_by_K = {0: float(r_full.std(ddof=0))}
+    for k_val in (5, 10, 15, 20):
+        Xr_k = residualize_topk(Xz, k_val)
+        R_k = np.corrcoef(Xr_k.T)
+        _, r_k = upper_pairs(R_k)
+        sigmas_by_K[k_val] = float(r_k.std(ddof=0))
+        thr95 = np.percentile(np.abs(r_k), 95)
+        thr99 = np.percentile(np.abs(r_k), 99)
+        crud_results_by_K[(k_val, 95)] = np.abs(r_k) > thr95
+        crud_results_by_K[(k_val, 99)] = np.abs(r_k) > thr99
 
-    sigma_K = float(r_resid.std(ddof=0))
-    sigma_0 = float(r_full.std(ddof=0))
+    flagged_crud95 = crud_results_by_K[(10, 95)]
+    flagged_crud99 = crud_results_by_K[(10, 99)]
+    sigma_K = sigmas_by_K[10]
+    sigma_0 = sigmas_by_K[0]
 
     methods = [
         ("Classical |r|>1.96/sqrt(n-1)", flagged_classical),
@@ -188,12 +199,15 @@ def run_one_seed(seed):
         ("BY-FDR (dependent BH)",         flagged_by),
         ("Efron empirical null + BH",     flagged_efron),
         ("Crud-aware K=0, 95%ile",        flagged_crud_raw),
-        ("Crud-aware K=10, 95%ile",       flagged_crud95),
-        ("Crud-aware K=10, 99%ile",       flagged_crud99),
+        ("Crud-aware K=5, 95%ile",        crud_results_by_K[(5, 95)]),
+        ("Crud-aware K=10, 95%ile",       crud_results_by_K[(10, 95)]),
+        ("Crud-aware K=15, 95%ile",       crud_results_by_K[(15, 95)]),
+        ("Crud-aware K=20, 95%ile",       crud_results_by_K[(20, 95)]),
+        ("Crud-aware K=10, 99%ile",       crud_results_by_K[(10, 99)]),
     ]
 
     results = {name: evaluate(flag, truth_pairs) for name, flag in methods}
-    return results, sigma_K, sigma_0, mu0, sigma0
+    return results, sigma_K, sigma_0, mu0, sigma0, sigmas_by_K
 
 
 def main():
@@ -205,20 +219,24 @@ def main():
     sigmas_0 = []
     efron_mu0 = []
     efron_sigma0 = []
+    all_sigmas_by_K = {k: [] for k in (0, 5, 10, 15, 20)}
     for s in range(N_SEEDS):
         seed = BASE_SEED + s
-        res, sk, s0, m0, e_sigma = run_one_seed(seed)
+        res, sk, s0, m0, e_sigma, sigmas_by_K = run_one_seed(seed)
         all_results.append(res)
         sigmas_K.append(sk)
         sigmas_0.append(s0)
         efron_mu0.append(m0)
         efron_sigma0.append(e_sigma)
+        for k_val, sk_val in sigmas_by_K.items():
+            all_sigmas_by_K[k_val].append(sk_val)
 
     method_names = list(all_results[0].keys())
     metrics = ["flagged", "TP", "FP", "precision", "recall", "F1"]
 
-    print(f"sigma_K (K=0)  : mean = {np.mean(sigmas_0):.4f}, SE = {np.std(sigmas_0)/np.sqrt(N_SEEDS):.4f}")
-    print(f"sigma_K (K=10) : mean = {np.mean(sigmas_K):.4f}, SE = {np.std(sigmas_K)/np.sqrt(N_SEEDS):.4f}")
+    for k_val in (0, 5, 10, 15, 20):
+        arr = np.array(all_sigmas_by_K[k_val])
+        print(f"sigma_K (K={k_val:>2}) : mean = {arr.mean():.4f}, SE = {arr.std()/np.sqrt(N_SEEDS):.4f}")
     print(f"Efron mu0      : mean = {np.mean(efron_mu0):+.3f}, SE = {np.std(efron_mu0)/np.sqrt(N_SEEDS):.3f}")
     print(f"Efron sigma0   : mean = {np.mean(efron_sigma0):.3f}, SE = {np.std(efron_sigma0)/np.sqrt(N_SEEDS):.3f}")
     print()

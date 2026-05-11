@@ -100,8 +100,14 @@ Bonferroni ($\alpha/M$)               & $1608\pm 21$ & $28$ & $1580\pm 21$ & $0.
 BH-FDR (theoretical null, $q=0.05$)   & $2988\pm 29$ & $45$ & $2942\pm 29$ & $0.015$ & $0.91$ & $0.030$ \\
 BY-FDR (dependent BH, $q=0.05$)       & $2318\pm 26$ & $41$ & $2276\pm 26$ & $0.018$ & $0.83$ & $0.035$ \\
 Efron empirical null + BH ($q=0.05$)  & $2160\pm 22$ & $39$ & $2121\pm 22$ & $0.018$ & $0.79$ & $0.036$ \\
-Crud-aware, 95th pct, $K=0$           & $\phantom{0}995$ & $\phantom{0}9$ & $\phantom{0}986$ & $0.009$ & $0.19$ & $0.018$ \\
-Crud-aware, 95th pct, $K=10$          & $\phantom{0}995$ & $49$ & $\phantom{0}946$ & $0.049$ & $0.98$ & $0.094$ \\
+\midrule
+\multicolumn{7}{l}{\emph{Crud-aware (95th percentile), $K$-sensitivity against $L=10$ latent factors:}} \\
+\phantom{XX}$K=0$ (no adjustment)     & $\phantom{0}995$ & $\phantom{0}9$ & $\phantom{0}986$ & $0.009$ & $0.19$ & $0.018$ \\
+\phantom{XX}$K=5$ (under-adjusted)    & $\phantom{0}995$ & $34$ & $\phantom{0}961$ & $0.034$ & $0.68$ & $0.065$ \\
+\phantom{XX}$K=10$ (matched to $L$)   & $\phantom{0}995$ & $49$ & $\phantom{0}946$ & $0.049$ & $0.98$ & $0.094$ \\
+\phantom{XX}$K=15$ (over-adjusted)    & $\phantom{0}995$ & $39$ & $\phantom{0}956$ & $0.039$ & $0.78$ & $0.075$ \\
+\phantom{XX}$K=20$ (over-adjusted)    & $\phantom{0}995$ & $28$ & $\phantom{0}967$ & $0.028$ & $0.56$ & $0.054$ \\
+\midrule
 Crud-aware, 99th pct, $K=10$          & $\phantom{0}199$ & $45$ & $\phantom{0}154$ & $0.226$ & $0.90$ & $0.361$ \\
 \bottomrule
 \end{tabular}
@@ -115,7 +121,9 @@ Crud-aware, 99th pct, $K=10$          & $\phantom{0}199$ & $45$ & $\phantom{0}15
 
 (iii) \emph{Crud-aware testing at $K=10$ provides the best precision/recall tradeoff at conventional thresholds.} The 95th-percentile rule recovers $96\%$ of direct edges with $4.8\%$ precision (still low because the prior is $0.0025$, but $30\times$ better than classical). The 99th-percentile rule trades recall for precision and lifts F1 from $0.09$ to $0.32$.
 
-\paragraph{Caveats.} The DGP is stylized, with fixed loadings, Gaussian noise, and edge-strengths chosen to make the comparison readable. The DGP also has $L=10$ latent factors and we adjust at $K=10$, so the PC adjustment exactly matches the latent dimensionality---the most favorable regime for the crud-aware test. When $K$ is mismatched to $L$ (under-adjusted: residual confounding remains; over-adjusted: signal absorbed into removed PCs), the crud-aware advantage shrinks and the comparison with BH/Efron is less one-sided. We do not claim the crud-aware test dominates alternatives in all regimes; if confounding is sparse and concentrated rather than broadly distributed, BH-FDR will perform much better. The takeaway is narrower: in regimes where the residual correlation distribution is broad and the user's adjustment dimension is reasonably matched to the latent confounding (the regime the empirical sections of this paper document across nine real datasets), the crud-aware diagnostic provides a useful magnitude check that classical and FDR-based methods do not.
+\paragraph{$K$-sensitivity.} The DGP has $L=10$ latent factors. At $K=10$ the PC adjustment exactly matches latent dimensionality (the most favorable regime). The five rows of the middle block in Table~\ref{tab:synthetic-benchmark} show what happens at $K\in\{0,5,10,15,20\}$: F1 peaks at $K=L$, but the crud-aware test still beats every FDR-based competitor (Efron+BH F1$=0.036$) at $K=5$ (F1$=0.065$) and $K=15$ (F1$=0.075$), and remains competitive even at $K=20$ (F1$=0.054$, double Efron's). The advantage degrades smoothly with mismatch rather than collapsing, so the user does not need to know $L$ exactly---a reasonably large $K$ in the vicinity of the true latent dimensionality preserves most of the benefit.
+
+\paragraph{Other caveats.} The DGP is stylized, with fixed loadings, Gaussian noise, and edge-strengths chosen to make the comparison readable. We do not claim the crud-aware test dominates alternatives in all regimes; if confounding is sparse and concentrated rather than broadly distributed, BH-FDR will perform much better. The takeaway is narrower: in regimes where the residual correlation distribution is broad and the user's adjustment dimension is reasonably close to the latent confounding (the regime the empirical sections of this paper document across nine real datasets), the crud-aware diagnostic provides a useful magnitude check that classical and FDR-based methods do not.
 
 
 \subsection{Reference catalog: choosing \texorpdfstring{$\sigma_K$}{sigma\_K} for an applied study}

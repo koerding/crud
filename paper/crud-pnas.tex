@@ -1,0 +1,70 @@
+\documentclass[9pt,twoside,lineno]{pnas-new}
+
+\templatetype{pnasresearcharticle}
+
+\title{Is correlation meaningfully correlated with causation? Crud, $1/f$ spectra, and an empirical null for small-effect observational claims}
+
+\author[1]{(Author)}
+\affil[1]{(Affiliation)}
+
+\leadauthor{(Lead author)}
+
+\significancestatement{Observational science routinely interprets small adjusted correlations as evidence for causal effects. Across nine large datasets, most pairs of measured variables are correlated to a non-trivial degree even after standard adjustments, and the typical small adjusted correlation in observational medicine, nutritional epidemiology, common-variant genetics, and brain-wide association studies has a magnitude not distinctive against the same-domain background. We propose the crud-aware percentile rank, which places any reported correlation within the empirical distribution of same-pipeline residuals. The diagnostic is a magnitude check complementary to identification: a small adjusted correlation whose magnitude is in the bulk of the empirical null is not, by itself, evidence of a direct causal relation, even if its classical $p$-value is tiny.}
+
+\authorcontributions{(To be filled.)}
+\authordeclaration{The author declares no competing interests.}
+\correspondingauthor{\textsuperscript{1}E-mail: (corresponding author)}
+
+\keywords{causal inference $|$ crud factor $|$ background dependence $|$ $1/f$ spectra $|$ empirical null}
+
+\begin{abstract}
+Causal claims in observational research typically interpret an adjusted correlation as evidence of a causal effect. For this logic to work, adjusted correlations must be informative about underlying causal effects. We test this assumption using nine large datasets spanning health, neuroscience, psychology, genomics, politics, and vision. Across all nine, most pairwise correlations are classically significant; the residual crud scale $\sigma_K$ shrinks only slowly under generic adjustment because shared variance is distributed across many components in approximately $1/f$ eigenvalue spectra. Even after removing $K=10$ principal components, $r=0.10$ does not exceed the conventional 95th-percentile magnitude threshold in six of the nine datasets, regardless of sample size: a magnitude unremarkable against same-pipeline background pairs. We propose the crud-aware diagnostic---a percentile rank in the empirical version, a $z$-test in a parametric small-study version---and use it to show that the typical published effect magnitude in observational medicine, nutritional epidemiology, common-variant genetics, and BWAS-style neuroscience does not clear the same-domain background. A decision-theoretic benchmark (Bayes error under a stylized Gaussian mixture) formalizes the magnitude-only limit. The diagnostic is a magnitude check complementary to identification: small adjusted correlations supported by RCT replication or mechanism (e.g., aspirin and cardiovascular mortality) can still encode real causation; magnitudes typical of randomly drawn pairs in the same domain cannot, by themselves.
+\end{abstract}
+
+\dates{This manuscript was compiled on \today}
+\doi{www.pnas.org/cgi/doi/10.1073/pnas.XXXXXXXXXX}
+
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage{longtable}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{assumption}{Assumption}
+\newtheorem{corollary}{Corollary}
+
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\Cov}{\operatorname{Cov}}
+\newcommand{\SD}{\operatorname{SD}}
+\newcommand{\PP}{\mathbb{P}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\diag}{\operatorname{diag}}
+\newcommand{\tr}{\operatorname{tr}}
+\newcommand{\1}{\mathbf{1}}
+\newcommand{\Ph}{\Phi}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{firststyle}
+\ifthenelse{\boolean{shortarticle}}{\ifthenelse{\boolean{singlecolumn}}{\abscontentformatted}{\abscontent}}{}
+
+\input{introduction}
+\input{results_data}
+\input{results_theory}
+\input{calibration}
+\input{discussion}
+
+\matmethods{
+\input{methods_main_body}
+}
+
+\showmatmethods
+
+\acknow{(Acknowledgments to be filled.)}
+\showacknow
+
+\bibliography{references}
+
+\end{document}

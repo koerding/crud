@@ -20,9 +20,9 @@
 \afterpage{\begin{sigstatement}
 \sffamily
 \mdfdefinestyle{pnassigstyle}{linewidth=0.7pt,backgroundcolor=pnasblueback,linecolor=pnasbluetext,fontcolor=pnasbluetext,innertopmargin=6pt,innerrightmargin=6pt,innerbottommargin=6pt,innerleftmargin=6pt}
-\@ifundefined{@significancestatement}{}{%	
+\@ifundefined{@significancestatement}{}{%
 	\begin{mdframed}[style=pnassigstyle]%
-	\section*{Significance Statement}%
+	{\large\sffamily\bfseries Significance Statement}\par\medskip%
 	\@significancestatement
 	\end{mdframed}}
 %     \medskip
